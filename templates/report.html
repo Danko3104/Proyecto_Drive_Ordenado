@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Detallado - Drive Ordenado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">📁</span>
+                <h1>Drive Ordenado</h1>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-link">← Inicio</a>
+                <a href="/resultados" class="nav-link">Resultados</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            {% if estadisticas %}
+            <div class="card">
+                <div class="card-header">
+                    <h2>📋 Reporte de Organización</h2>
+                    <span class="timestamp">{{ timestamp }}</span>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="section-title">Contenido del CSV Generado</h3>
+                    <p class="report-description">
+                        El archivo <code>reporte_organizacion.csv</code> contiene la siguiente información para cada archivo:
+                    </p>
+
+                    <div class="csv-columns">
+                        <div class="column-item">
+                            <span class="column-name">nombre_original</span>
+                            <span class="column-desc">Nombre del archivo original</span>
+                        </div>
+                        <div class="column-item">
+                            <span class="column-name">extension</span>
+                            <span class="column-desc">Extensión del archivo</span>
+                        </div>
+                        <div class="column-item">
+                            <span class="column-name">categoria</span>
+                            <span class="column-desc">Categoría asignada (documentos, imágenes, etc.)</span>
+                        </div>
+                        <div class="column-item">
+                            <span class="column-name">tamaño_bytes</span>
+                            <span class="column-desc">Tamaño en bytes</span>
+                        </div>
+                        <div class="column-item">
+                            <span class="column-name">fecha_modificacion</span>
+                            <span class="column-desc">Fecha de última modificación</span>
+                        </div>
+                        <div class="column-item">
+                            <span class="column-name">ruta_destino</span>
+                            <span class="column-desc">Ubicación final después de organizar</span>
+                        </div>
+                        <div class="column-item">
+                            <span class="column-name">es_duplicado</span>
+                            <span class="column-desc">Indica si es un archivo duplicado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="section-title">Distribución por Año</h3>
+                    <div class="year-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Año</th>
+                                    <th>Cantidad de Archivos</th>
+                                    <th>Tamaño Total (MB)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for año, datos in estadisticas.por_año.items() %}
+                                <tr>
+                                    <td>{{ año }}</td>
+                                    <td>{{ datos.cantidad }}</td>
+                                    <td>{{ "%.2f"|format(datos.tamaño_mb) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="section-title">Extensiones Encontradas</h3>
+                    <div class="extension-list">
+                        {% for ext, datos in estadisticas.por_extension.items() %}
+                        <div class="extension-badge">
+                            <span class="ext-name">{{ ext }}</span>
+                            <span class="ext-count">{{ datos.cantidad }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="section-title">Ejemplo de Salida CSV</h3>
+                    <div class="csv-preview">
+                        <pre><code>nombre_original,extension,categoria,tamaño_bytes,fecha_modificacion,ruta_destino,es_duplicado
+archivo1.pdf,.pdf,documentos,154320,2024-03-15 10:30:00,/ruta/destino/Documentos/2024/Marzo/archivo1.pdf,No
+imagen1.jpg,.jpg,imagenes,2048560,2023-12-20 14:45:00,/ruta/destino/Imagenes/2023/Diciembre/imagen1.jpg,No
+video1.mp4,.mp4,multimedia,15240000,2024-01-10 09:15:00,/ruta/destino/Multimedia/2024/Enero/video1.mp4,Si
+documento.docx,.docx,documentos,45200,2024-05-22 16:20:00,/ruta/destino/Documentos/2024/Mayo/documento.docx,No</code></pre>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3 class="section-title">Resumen Estadístico</h3>
+                    <div class="stats-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Total de archivos:</span>
+                            <span class="summary-value">{{ estadisticas.resumen.total_archivos }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Tamaño total:</span>
+                            <span class="summary-value">{{ estadisticas.resumen.tamaño_total_mb }} MB</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Categorías:</span>
+                            <span class="summary-value">{{ estadisticas.resumen.total_categorias }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Extensiones diferentes:</span>
+                            <span class="summary-value">{{ estadisticas.resumen.total_extensiones }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Tamaño promedio:</span>
+                            <span class="summary-value">{{ estadisticas.tamaño_stats.promedio_mb }} MB</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Archivo más grande:</span>
+                            <span class="summary-value">{{ estadisticas.tamaño_stats.maximo_mb }} MB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <a href="/descargar_reporte" class="btn btn-primary">
+                        <span class="btn-icon">⬇️</span>
+                        Descargar CSV
+                    </a>
+                    <a href="/resultados" class="btn btn-secondary">
+                        ← Volver a Resultados
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="card card-empty">
+                <div class="card-body">
+                    <div class="empty-icon">📭</div>
+                    <h3>No hay reporte disponible</h3>
+                    <p>Ejecuta un proceso de organización primero para generar el reporte.</p>
+                    <a href="/" class="btn btn-primary">Ir al formulario</a>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+
+        <footer class="footer">
+            <p>Drive Ordenado - Proyecto de Gestión de Archivos</p>
+            <p class="footer-authors">Mendoza Gomez Eleangie Valentina | Tavera Carreño Daniel José</p>
+        </footer>
+    </div>
+</body>
+</html>

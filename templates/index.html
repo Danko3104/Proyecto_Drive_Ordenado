@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drive Ordenado - Organizador de Archivos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">📁</span>
+                <h1>Drive Ordenado</h1>
+            </div>
+            <p class="subtitle">Organiza y clasifica tus archivos en Google Drive automáticamente</p>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Configuración de Organización</h2>
+                </div>
+
+                <form id="organizeForm" class="form">
+                    <div class="form-group">
+                        <label for="ruta_origen">
+                            <span class="label-icon">📂</span>
+                            Ruta de la carpeta a organizar
+                        </label>
+                        <input type="text"
+                               id="ruta_origen"
+                               name="ruta_origen"
+                               placeholder="/content/drive/MyDrive/MiCarpeta"
+                               required>
+                        <span class="help-text">Ejemplo: /content/drive/MyDrive/Descargas</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ruta_destino">
+                            <span class="label-icon">📁</span>
+                            Carpeta destino (opcional)
+                        </label>
+                        <input type="text"
+                               id="ruta_destino"
+                               name="ruta_destino"
+                               placeholder="Dejar en blanco para usar la misma ruta origen">
+                        <span class="help-text">Si se deja vacío, se organizará en la misma carpeta origen</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="criterio">
+                                <span class="label-icon">📊</span>
+                                Criterio principal
+                            </label>
+                            <select id="criterio" name="criterio">
+                                <option value="tipo">Por tipo de archivo</option>
+                                <option value="fecha">Por fecha de modificación</option>
+                                <option value="tamaño">Por tamaño del archivo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                   id="organizar_por_fecha"
+                                   name="organizar_por_fecha"
+                                   checked>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">
+                                <strong>Organizar por fecha</strong>
+                                <span class="checkbox-description">Crear subcarpetas por año y mes</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox"
+                                   id="detectar_duplicados"
+                                   name="detectar_duplicados">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">
+                                <strong>Detectar duplicados</strong>
+                                <span class="checkbox-description">Identificar archivos duplicados (más lento)</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-icon">ℹ️</span>
+                        <div class="info-content">
+                            <strong>Categorías automáticas:</strong>
+                            <ul>
+                                <li><strong>Documentos:</strong> PDF, Word, Excel, PowerPoint, TXT, CSV</li>
+                                <li><strong>Imágenes:</strong> JPG, PNG, GIF, SVG, WEBP</li>
+                                <li><strong>Multimedia:</strong> MP4, MP3, AVI, MOV, WAV, MKV</li>
+                                <li><strong>Otros:</strong> Cualquier otra extensión</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="btnOrganizar">
+                            <span class="btn-icon">🚀</span>
+                            Organizar Archivos
+                        </button>
+                    </div>
+                </form>
+
+                <div id="progressSection" class="progress-section hidden">
+                    <div class="progress-header">
+                        <span class="progress-status" id="progressStatus">Iniciando...</span>
+                        <span class="progress-percentage" id="progressPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-message" id="progressMessage">
+                        Preparando el proceso de organización...
+                    </div>
+                </div>
+
+                <div id="resultSection" class="result-section hidden">
+                    <div class="result-icon" id="resultIcon">✅</div>
+                    <h3 class="result-title" id="resultTitle">¡Organización completada!</h3>
+                    <p class="result-message" id="resultMessage"></p>
+                    <div class="result-actions">
+                        <a href="/resultados" class="btn btn-secondary">
+                            <span class="btn-icon">📊</span>
+                            Ver Resultados
+                        </a>
+                        <a href="/reporte" class="btn btn-secondary">
+                            <span class="btn-icon">📋</span>
+                            Ver Reporte
+                        </a>
+                    </div>
+                </div>
+
+                <div id="errorSection" class="error-section hidden">
+                    <div class="error-icon">❌</div>
+                    <h3 class="error-title">Ha ocurrido un error</h3>
+                    <p class="error-message" id="errorMessage"></p>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        Intentar de nuevo
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Drive Ordenado - Proyecto de Gestión de Archivos</p>
+            <p class="footer-authors">Mendoza Gomez Eleangie Valentina | Tavera Carreño Daniel José</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

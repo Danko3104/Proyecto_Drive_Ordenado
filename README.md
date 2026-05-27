@@ -1,0 +1,283 @@
+# 📁 Drive Ordenado
+
+Aplicación web que automatiza la organización de archivos en Google Drive montado en Google Colab. Organiza, clasifica, detecta duplicados y genera reportes completos de tus archivos.
+
+---
+
+## 👥 Integrantes
+
+- **Mendoza Gomez Eleangie Valentina** (2242557)
+- **Tavera Carreño Daniel José** (2243042)
+
+---
+
+## 📋 Descripción del Proyecto
+
+**Drive Ordenado** es una aplicación web desarrollada en Python con Flask que permite organizar automáticamente archivos en Google Drive. El usuario interactúa desde el navegador sin necesidad de tocar código, indicando la ruta de Drive y configurando opciones según sus necesidades.
+
+### Funcionalidades principales:
+
+- **Escaneo recursivo** de archivos en cualquier carpeta
+- **Clasificación automática** por tipo (documentos, imágenes, multimedia, otros)
+- **Organización jerárquica** por fecha (año/mes)
+- **Detección de duplicados** mediante hash MD5
+- **Generación de reportes CSV** con estadísticas detalladas
+- **Interfaz web moderna** y responsive
+- **Acceso público** mediante tunneling con trycloudflare
+
+---
+
+## 🛠️ Stack Tecnológico
+
+| Componente | Tecnología |
+|------------|------------|
+| Backend | Python 3 + Flask |
+| Frontend | HTML5 + CSS3 + JavaScript (vanilla) |
+| Procesamiento de datos | pandas, numpy |
+| Tunneling | cloudflared (trycloudflare) |
+| Entorno | Google Colab |
+
+---
+
+## ✅ Requisitos Previos
+
+1. **Google Colab** con acceso a Google Drive montado
+2. **Python 3.8** o superior
+3. **Conexión a internet** para descargar dependencias
+
+---
+
+## 🚀 Instrucciones de Instalación y Uso en Google Colab
+
+### Paso 1: Montar Google Drive
+
+```python
+from google.colab import drive
+drive.mount('/content/drive')
+```
+
+### Paso 2: Clonar el repositorio
+
+```bash
+!git clone https://github.com/Danko3104/Proyecto_Drive_Ordenado.git
+```
+
+### Paso 3: Navegar al directorio del proyecto
+
+```bash
+cd Proyecto_Drive_Ordenado
+```
+
+### Paso 4: Ejecutar el script de inicio
+
+```bash
+!bash start.sh
+```
+
+Este script automáticamente:
+- Instala todas las dependencias de Python
+- Descarga cloudflared si no está presente
+- Inicia el servidor Flask en el puerto 5000
+- Crea un túnel público con trycloudflare
+
+### Paso 5: Acceder a la aplicación
+
+Una vez iniciado, verás en la consola una URL como:
+```
+https://xxxx-xxxx-xxxx.trycloudflare.com
+```
+
+Haz clic en esa URL o copia y pégala en tu navegador.
+
+---
+
+## 📖 Guía de Uso
+
+### 1. Pantalla Principal
+
+En la interfaz web encontrarás:
+
+- **Ruta de la carpeta**: Ingresa la ruta completa (ej: `/content/drive/MyDrive/Descargas`)
+- **Carpeta destino**: Opcional, dejar en blanco para organizar en la misma ubicación
+- **Criterio principal**: Elegir entre organizar por tipo, fecha o tamaño
+- **Organizar por fecha**: Checkbox para crear subcarpetas por año/mes
+- **Detectar duplicados**: Checkbox para identificar archivos duplicados (más lento)
+
+### 2. Iniciar Organización
+
+1. Completa los campos del formulario
+2. Haz clic en "Organizar Archivos"
+3. Confirma la acción en el diálogo
+4. Espera a que el proceso termine (verás una barra de progreso)
+
+### 3. Ver Resultados
+
+Una vez completado, podrás:
+- Ver estadísticas en la pantalla de resultados
+- Descargar el reporte CSV
+- Ver el reporte detallado en el navegador
+
+---
+
+## 📁 Estructura de Carpetas Generada
+
+Al organizar por **tipo** y **fecha**, la estructura resultante será:
+
+```
+Carpeta_Organizada/
+├── Documentos/
+│   ├── 2024/
+│   │   ├── Enero/
+│   │   │   └── archivo.pdf
+│   │   ├── Febrero/
+│   │   └── Marzo/
+│   │       └── documento.docx
+│   └── 2023/
+│       ├── Diciembre/
+│       └── Noviembre/
+├── Imágenes/
+│   ├── 2024/
+│   │   └── Marzo/
+│   │       └── foto.jpg
+│   └── 2023/
+│       └── Diciembre/
+│           └── imagen.png
+├── Multimedia/
+│   └── 2024/
+│       └── Febrero/
+│           └── video.mp4
+└── Otros/
+    └── 2024/
+        └── archivo.xyz
+```
+
+---
+
+## 📊 Categorías de Archivos
+
+| Categoría | Extensiones |
+|-----------|-------------|
+| **Documentos** | .pdf, .docx, .doc, .txt, .pptx, .xlsx, .csv |
+| **Imágenes** | .jpg, .jpeg, .png, .gif, .bmp, .svg, .webp |
+| **Multimedia** | .mp4, .mp3, .avi, .mov, .wav, .mkv |
+| **Otros** | Cualquier otra extensión |
+
+---
+
+## 📄 Ejemplo de Reporte CSV
+
+El archivo `reporte_organizacion.csv` contiene las siguientes columnas:
+
+```csv
+nombre_original,extension,categoria,tamaño_bytes,fecha_modificacion,ruta_destino,es_duplicado
+informe_anual.pdf,.pdf,documentos,1543200,2024-03-15 10:30:00,/ruta/destino/Documentos/2024/Marzo/informe_anual.pdf,No
+foto_vacaciones.jpg,.jpg,imagenes,2048560,2023-12-20 14:45:00,/ruta/destino/Imagenes/2023/Diciembre/foto_vacaciones.jpg,No
+presentacion.pptx,.pptx,documentos,4520000,2024-01-10 09:15:00,/ruta/destino/Documentos/2024/Enero/presentacion.pptx,Si
+cancion_favorita.mp3,.mp3,multimedia,5242880,2024-05-22 16:20:00,/ruta/destino/Multimedia/2024/Mayo/cancion_favorita.mp3,No
+```
+
+### Columnas del CSV:
+
+| Columna | Descripción |
+|---------|-------------|
+| `nombre_original` | Nombre del archivo antes de organizar |
+| `extension` | Extensión del archivo |
+| `categoria` | Categoría asignada (documentos, imagenes, multimedia, otros) |
+| `tamaño_bytes` | Tamaño del archivo en bytes |
+| `fecha_modificacion` | Fecha de última modificación (YYYY-MM-DD HH:MM:SS) |
+| `ruta_destino` | Ruta final donde fue movido el archivo |
+| `es_duplicado` | "Si" si es duplicado, "No" en caso contrario |
+
+---
+
+## 🔍 Detección de Duplicados
+
+El sistema detecta archivos duplicados calculando el **hash MD5** de cada archivo:
+
+- Archivos con el mismo contenido tienen el mismo hash
+- Los duplicados son marcados en el CSV pero **NO se eliminan**
+- Se reporta el espacio ocupado por duplicados
+
+Para archivos grandes (>500MB), se usa un hash parcial (inicio + final + tamaño) para optimizar el rendimiento.
+
+---
+
+## 🏗️ Estructura del Proyecto
+
+```
+proyecto_drive_ordenado/
+├── app.py                  # Servidor Flask principal
+├── organizer.py            # Lógica de organización
+├── reporter.py             # Generación de reportes CSV
+├── duplicates.py           # Detección de duplicados
+├── requirements.txt        # Dependencias Python
+├── start.sh                # Script de inicio
+├── README.md               # Documentación
+├── templates/
+│   ├── index.html          # Página principal
+│   ├── result.html         # Pantalla de resultados
+│   └── report.html         # Vista del reporte
+└── static/
+    ├── style.css           # Estilos CSS
+    └── script.js           # JavaScript frontend
+```
+
+---
+
+## ⚙️ API Endpoints
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/` | GET | Página principal con formulario |
+| `/organizar` | POST | Inicia el proceso de organización |
+| `/estado` | GET | Consulta el estado del proceso en curso |
+| `/resultados` | GET | Muestra los resultados del último proceso |
+| `/reporte` | GET | Vista detallada del reporte CSV |
+| `/descargar_reporte` | GET | Descarga el archivo CSV |
+| `/api/estadisticas` | GET | API JSON con estadísticas |
+
+---
+
+## ⚠️ Notas Importantes
+
+1. **Los archivos originales nunca se eliminan**, solo se mueven a nuevas ubicaciones
+2. Si un archivo con el mismo nombre existe en destino, se renombra automáticamente (`archivo_1.pdf`, `archivo_2.pdf`, etc.)
+3. La detección de duplicados puede ser lenta en carpetas con muchos archivos grandes
+4. El túnel de trycloudflare es temporal y cambia cada vez que reinicias la aplicación
+
+---
+
+## 🔧 Solución de Problemas
+
+### Error: "La ruta no existe"
+- Verifica que Google Drive esté montado correctamente
+- Asegúrate de que la ruta comience con `/content/drive/`
+
+### Error: "Permission denied" al mover archivos
+- Algunos archivos de sistema de Google Drive pueden tener restricciones
+- Los archivos afectados se reportan en el CSV con el error correspondiente
+
+### El túnel no se genera
+- Verifica que cloudflared se descargó correctamente
+- Ejecuta `chmod +x cloudflared-linux-amd64` manualmente
+- Intenta reiniciar el runtime de Colab
+
+---
+
+## 📜 Licencia
+
+Proyecto académico desarrollado para fines educativos.
+
+---
+
+## 🙏 Créditos
+
+Desarrollado como proyecto de programación en Python.
+
+- **Backend**: Python, Flask, pandas
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Tunneling**: Cloudflare Tunnel
+
+---
+
+**¡Gracias por usar Drive Ordenado!** 📁✨

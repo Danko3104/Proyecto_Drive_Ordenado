@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados - Drive Ordenado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">📁</span>
+                <h1>Drive Ordenado</h1>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-link">← Volver al inicio</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            {% if error %}
+            <div class="card card-error">
+                <div class="card-header">
+                    <h2>❌ Error en el proceso</h2>
+                </div>
+                <div class="card-body">
+                    <p class="error-text">{{ error }}</p>
+                    <a href="/" class="btn btn-primary">Volver al inicio</a>
+                </div>
+            </div>
+            {% elif resultado %}
+            <div class="card">
+                <div class="card-header">
+                    <h2>📊 Resumen de la Organización</h2>
+                    <span class="timestamp">{{ resultado.timestamp }}</span>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card stat-primary">
+                        <div class="stat-icon">📄</div>
+                        <div class="stat-value" id="statTotal">{{ resultado.archivos_procesados }}</div>
+                        <div class="stat-label">Archivos procesados</div>
+                    </div>
+
+                    <div class="stat-card stat-success">
+                        <div class="stat-icon">📂</div>
+                        <div class="stat-value" id="statCategorias">{{ resultado.estadisticas.resumen.total_categorias }}</div>
+                        <div class="stat-label">Categorías</div>
+                    </div>
+
+                    <div class="stat-card stat-info">
+                        <div class="stat-icon">💾</div>
+                        <div class="stat-value" id="statTamano">{{ resultado.estadisticas.resumen.tamaño_total_mb }}</div>
+                        <div class="stat-label">MB totales</div>
+                    </div>
+
+                    <div class="stat-card stat-warning">
+                        <div class="stat-icon">🔍</div>
+                        <div class="stat-value" id="statDuplicados">{{ resultado.estadisticas.duplicados.cantidad }}</div>
+                        <div class="stat-label">Duplicados</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">📁 Distribución por Categoría</h3>
+                    <div class="category-grid">
+                        {% for categoria, datos in resultado.estadisticas.por_categoria.items() %}
+                        <div class="category-card">
+                            <div class="category-header">
+                                <span class="category-icon">
+                                    {% if categoria == 'documentos' %}📄
+                                    {% elif categoria == 'imagenes' %}🖼️
+                                    {% elif categoria == 'multimedia' %}🎬
+                                    {% else %}📦{% endif %}
+                                </span>
+                                <span class="category-name">{{ categoria.capitalize() }}</span>
+                            </div>
+                            <div class="category-stats">
+                                <div class="category-count">{{ datos.cantidad }} archivos</div>
+                                <div class="category-size">{{ "%.2f"|format(datos.tamaño_bytes / (1024*1024)) }} MB</div>
+                            </div>
+                            <div class="category-bar">
+                                {% set porcentaje = (datos.cantidad / resultado.archivos_procesados * 100) if resultado.archivos_procesados > 0 else 0 %}
+                                <div class="category-fill" style="width: {{ porcentaje }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if resultado.estadisticas.duplicados.cantidad > 0 %}
+                <div class="section section-warning">
+                    <h3 class="section-title">⚠️ Archivos Duplicados Detectados</h3>
+                    <div class="duplicate-summary">
+                        <div class="duplicate-stat">
+                            <span class="duplicate-value">{{ resultado.estadisticas.duplicados.cantidad }}</span>
+                            <span class="duplicate-label">archivos duplicados</span>
+                        </div>
+                        <div class="duplicate-stat">
+                            <span class="duplicate-value">{{ resultado.estadisticas.duplicados.espacio_ocupado_mb }}</span>
+                            <span class="duplicate-label">MB ocupados innecesariamente</span>
+                        </div>
+                    </div>
+                    <p class="duplicate-note">
+                        Los archivos duplicados han sido marcados en el reporte CSV pero no han sido eliminados.
+                        Puedes revisarlos manualmente en la ubicación indicada.
+                    </p>
+                </div>
+                {% endif %}
+
+                <div class="section">
+                    <h3 class="section-title">📈 Estadísticas Adicionales</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Extensiones únicas:</span>
+                            <span class="info-value">{{ resultado.estadisticas.resumen.total_extensiones }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Tamaño promedio:</span>
+                            <span class="info-value">{{ resultado.estadisticas.tamaño_stats.promedio_mb }} MB</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Archivo más grande:</span>
+                            <span class="info-value">{{ resultado.estadisticas.tamaño_stats.maximo_mb }} MB</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Años cubiertos:</span>
+                            <span class="info-value">{{ resultado.estadisticas.resumen.años_cubiertos|join(', ') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">📁 Estructura de Carpetas Generada</h3>
+                    <div class="folder-structure">
+                        <div class="folder-item">
+                            <span class="folder-icon">📁</span>
+                            <span class="folder-name">{{ resultado.ruta_destino.split('/')[-1] }}</span>
+                        </div>
+                        {% for categoria in resultado.estadisticas.por_categoria.keys() %}
+                        <div class="folder-item folder-level-1">
+                            <span class="folder-icon">📂</span>
+                            <span class="folder-name">{{ categoria.capitalize() }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <a href="/descargar_reporte" class="btn btn-primary">
+                        <span class="btn-icon">⬇️</span>
+                        Descargar Reporte CSV
+                    </a>
+                    <a href="/reporte" class="btn btn-secondary">
+                        <span class="btn-icon">📋</span>
+                        Ver Reporte Detallado
+                    </a>
+                    <a href="/" class="btn btn-outline">
+                        Organizar otra carpeta
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="card card-empty">
+                <div class="card-body">
+                    <div class="empty-icon">📭</div>
+                    <h3>No hay resultados disponibles</h3>
+                    <p>Aún no se ha ejecutado ningún proceso de organización.</p>
+                    <a href="/" class="btn btn-primary">Ir al formulario</a>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+
+        <footer class="footer">
+            <p>Drive Ordenado - Proyecto de Gestión de Archivos</p>
+            <p class="footer-authors">Mendoza Gomez Eleangie Valentina | Tavera Carreño Daniel José</p>
+        </footer>
+    </div>
+</body>
+</html>
