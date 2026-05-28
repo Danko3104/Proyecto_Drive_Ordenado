@@ -113,8 +113,8 @@ body {
 /* Theme Toggle */
 .theme-toggle {
     position: absolute;
-    top: var(--spacing);
-    left: var(--spacing);
+    top: 8px;
+    right: 8px;
     background: var(--color-card);
     border: 2px solid var(--color-border);
     border-radius: var(--radius);
