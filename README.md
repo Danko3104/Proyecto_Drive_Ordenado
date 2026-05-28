@@ -53,9 +53,8 @@ Aplicación web que automatiza la organización de archivos en Google Drive mont
 
 ### Paso 1: Montar Google Drive
 
-Ejecuta esto en una celda de código:
-
 ```python
+# Conectar tu Google Drive a Colab
 from google.colab import drive
 drive.mount('/content/drive')
 ```
@@ -63,45 +62,55 @@ drive.mount('/content/drive')
 ### Paso 2: Clonar el repositorio (SIEMPRE FRESH)
 
 ```bash
-# Eliminar si existe de antes (para asegurar código actualizado)
+# Eliminar carpeta si existe de antes (para asegurar código actualizado)
 !rm -rf Proyecto_Drive_Ordenado
 
-# Clonar el repositorio
+# Descargar el código desde GitHub
 !git clone https://github.com/Danko3104/Proyecto_Drive_Ordenado.git
 ```
 
-### Paso 3: Navegar al directorio del proyecto
+### Paso 3: Entrar al directorio del proyecto
 
 ```bash
-cd Proyecto_Drive_Ordenado
+# Cambiar a la carpeta del proyecto
+%cd Proyecto_Drive_Ordenado
 ```
 
 ### Paso 4: Instalar dependencias
 
 ```bash
+# Instalar Flask y otras librerías necesarias
 !pip install flask pandas numpy
 ```
 
-### Paso 5: Descargar cloudflared
+### Paso 5: Descargar cloudflared (para crear el túnel)
 
 ```bash
+# Descargar el programa que crea el enlace público
 !wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+
+# Dar permisos de ejecución
 !chmod +x cloudflared-linux-amd64
 ```
 
 ### Paso 6: Iniciar el servidor Flask
 
-En una celda separada (esto debe quedar corriendo):
-
 ```bash
-!python3 app.py &
+# Iniciar el servidor web en segundo plano (no muestra logs aquí)
+!nohup python3 app.py > flask.log 2>&1 &
+
+# Esperar 3 segundos a que inicie
+!sleep 3
+
+# Verificar que está corriendo
+!curl -s http://localhost:5000 > /dev/null && echo "✅ Servidor listo" || echo "❌ Error al iniciar"
 ```
 
 ### Paso 7: Crear túnel público
 
-Espera 3-5 segundos después del paso anterior, luego ejecuta:
-
 ```bash
+# Crear el enlace público para acceder desde cualquier navegador
+# Este comando muestra la URL al cabo de unos segundos
 !./cloudflared-linux-amd64 tunnel --url http://localhost:5000
 ```
 
