@@ -3,20 +3,8 @@
 ## 🚨 URGENTE - Arreglar Primero
 
 ### 1. Duplicados no aparecen en el Reporte
-**Problema**: La sección de duplicados está documentada y en el código, pero no se muestra en la interfaz.
-
-**Código involucrado**:
-- `app.py` función `reporte()` (líneas ~281-320)
-- `templates/report.html` (líneas ~52-77)
-- `reporter.py` función `generar_reporte_csv()`
-
-**Pasos para debuggear**:
-1. Verificar que el CSV generado tenga la columna `es_duplicado`
-2. Verificar que los valores sean "Si" o "No" (case sensitive)
-3. Agregar prints en `reporte()` para ver si `duplicados_detalle` se está llenando
-4. Revisar que el template reciba la variable correctamente
-
-**Nota**: En la página de resultados sí aparecen los duplicados, el problema es específicamente en el reporte detallado.
+**Estado**: ✅ RESUELTO - 2026-05-28
+**Nota**: El bug fue corregido en la versión actual del código. La sección de duplicados ahora se muestra correctamente en `report.html` cuando existen duplicados.
 
 ---
 
@@ -24,7 +12,7 @@
 
 ### 1. Carpetas vacías después de organizar
 **Estado**: ✅ RESUELTO - 2026-05-28
-**Solución**: 
+**Solución**:
 - Se agregó función `eliminar_carpetas_vacias()` en `organizer.py`
 - Elimina carpetas vacías recursivamente después de mover archivos
 - Se muestra contador en resultados con sección desplegable
@@ -32,16 +20,17 @@
 ### 2. Layout de tarjetas en resultados
 **Estado**: ✅ RESUELTO - 2026-05-28
 **Solución**:
-- Grid flexible con flex-wrap para redistribuir tarjetas
-- Lupa 🔍 en esquina superior derecha de tarjetas desplegables
-- íconos de desplegar (⌄/⌃) solo en headers de secciones
+- Grid CSS con `auto-fit` para distribuir las 5 tarjetas uniformemente
+- Las tarjetas ocupan toda la fila sin dejar espacios vacíos
+- Padding y gap reducidos para que quepan las 5 tarjetas arriba
 
 ### 3. Gráficas del reporte
 **Estado**: ✅ RESUELTO - 2026-05-28
 **Solución**:
-- Gráficas con altura fija de 300px
-- Grid de 2 columnas iguales
-- Ocultar gráfica "Archivos por Año" si solo hay 1 año
+- Gráficas apiladas en una sola columna para mejor visualización
+- Altura ajustada a 320px para que se vean grandes
+- Pie chart con leyenda en posición `bottom`
+- Título "Visualización de Datos" centrado y agrandado
 
 ### 4. Badges informativos
 **Estado**: ✅ RESUELTO - 2026-05-28
@@ -49,17 +38,37 @@
 - Badge "X tipos" en Extensiones Encontradas
 - Badge "X años" en Distribución por Año
 
-### 5. Íconos de colapsar
+### 5. Iconos de colapsar/elargar
 **Estado**: ✅ RESUELTO - 2026-05-28
 **Solución**:
-- Cambiar triángulos por ⌄ (cerrado) y ⌃ (abierto)
-- Color primary (azul) para mejor visibilidad
+- Se eliminaron los iconos ⌄/⌃ de todos los templates (`result.html` y `report.html`)
+- JavaScript simplificado para no manipular iconos de toggle
+
+### 6. Theme toggle posicionado
+**Estado**: ✅ RESUELTO - 2026-05-28
+**Solución**:
+- Botón de tema movido a esquina superior derecha (`top: 8px; right: 8px`)
+- Ya no interfiere con el título centrado
+
+### 7. Favicon
+**Estado**: ✅ RESUELTO - 2026-05-28
+**Solución**:
+- Agregado favicon con emoji 📁 en las 3 páginas (`index.html`, `result.html`, `report.html`)
+- Usa SVG data URI para no depender de archivos externos
+
+### 8. Botón de acceso directo a Google Drive
+**Estado**: ✅ RESUELTO - 2026-05-28
+**Solución**:
+- Botón 🚀 Abrir Drive en el footer de `result.html`
+- Botón 🚀 Abrir Drive en el footer de `report.html`
+- Botón 🚀 Abrir Drive en la pantalla de éxito de `index.html`
+- Abre Google Drive en una nueva pestaña
 
 ---
 
-## 🎨 Mejoras Visuales
+## 🎨 Mejoras Visuales Pendientes
 
-### 2. Navegación del Reporte
+### Navegación del Reporte
 **Ubicación**: `templates/report.html`, línea ~18-21
 
 **Problema**: Los enlaces "← Inicio" y "Resultados" están muy pegados.
@@ -78,23 +87,23 @@
 
 ## ✨ Funcionalidades Futuras (Nice to Have)
 
-### 4. Previsualización de Imágenes
+### 1. Previsualización de Imágenes
 - Mostrar miniaturas de imágenes en el preview
 - Usar `send_file` con ruta temporal
 
-### 5. Búsqueda/Filtro
+### 2. Búsqueda/Filtro
 - Campo de búsqueda en el reporte
 - Filtrar por nombre, extensión, categoría
 
-### 6. Exportar a Excel
+### 3. Exportar a Excel
 - Usar librería `openpyxl` o `xlsxwriter`
 - Agregar botón "Descargar Excel" junto al CSV
 
-### 7. Programar Tareas
+### 4. Programar Tareas
 - Usar `APScheduler` para ejecutar organización automática
 - Interfaz para seleccionar frecuencia (diario, semanal)
 
-### 8. Undo/Deshacer
+### 5. Undo/Deshacer
 - Guardar log de movimientos
 - Botón "Deshacer última organización"
 - Revertir archivos a su ubicación original
@@ -137,14 +146,5 @@
 
 ---
 
-## 🐛 Bugs Conocidos
-
-### Bug #1: Duplicados en Reporte
-**Estado**: 🔴 Crítico
-**Descripción**: La sección de duplicados no aparece en report.html aunque sí hay duplicados
-**Asignado**: Por investigar
-
----
-
 **Última actualización**: 2026-05-28
-**Próxima revisión**: Cuando se reporte el bug de duplicados como arreglado
+**Próxima revisión**: Al completar testing pendiente o agregar nueva funcionalidad

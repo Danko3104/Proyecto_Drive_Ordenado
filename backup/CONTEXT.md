@@ -23,11 +23,14 @@
 - [x] Modo oscuro/claro con persistencia en localStorage
 - [x] Interfaz web responsive
 - [x] Eliminación automática de carpetas vacías
+- [x] Botón de acceso directo a Google Drive
+- [x] Favicon en todas las páginas
 
 ### Gráficas en Reporte
 - [x] Distribución por Categoría (doughnut)
 - [x] Archivos por Año (barras) - se oculta si solo hay 1 año
-- [x] Extensiones Principales (pie) - centrada
+- [x] Extensiones Principales (pie) - leyenda abajo
+- [x] Gráficas apiladas en una sola columna para mejor visualización
 - [ ] ~~Distribución de Tamaños~~ (eliminada por solicitud del usuario)
 
 ### Secciones Desplegables en Reporte
@@ -44,34 +47,31 @@
 
 ### UI/UX
 - [x] Lupa 🔍 en esquina superior derecha de tarjetas desplegables
-- [x] Íconos ⌄/⌃ para secciones colapsables
-- [x] Grid flexible para tarjetas de resultados
+- [x] Grid CSS flexible para tarjetas de resultados (5 tarjetas en fila)
 - [x] Badges informativos en headers desplegables
+- [x] Theme toggle en esquina superior derecha
+- [x] Título de visualización centrado y agrandado
+- [x] Iconos de flecha (⌄/⌃) eliminados de secciones desplegables
 
 ---
 
 ## 🔧 Problemas Conocidos / Pendientes
 
 ### 🔴 Críticos
-1. **Sección de Duplicados en Reporte no aparece**
-   - El template `report.html` verifica `{% if duplicados_detalle and duplicados_detalle|length > 0 %}`
-   - La función `reporte()` en `app.py` carga los duplicados desde el CSV
-   - **Problema**: Los duplicados no se están mostrando aunque existan en el CSV
-   - **Posible causa**: El CSV no tiene la columna `es_duplicado` correctamente poblada
-   - **Ubicación**: Revisar `reporter.py` función `generar_reporte_csv()`
+*Todos los bugs críticos han sido resueltos.*
 
 ### 🟡 Mejoras Visuales
-2. **Navegación en Reporte**
+1. **Navegación del Reporte**
    - Los enlaces "← Inicio" y "Resultados" están muy pegados
-   - Se agregó un `span` con margen entre ellos como solución temporal
-   - **Podría mejorarse**: Con flexbox y gap en el CSS
+   - **Solución actual**: Se agregó un span con margen entre ellos
+   - **Mejora ideal**: Usar Flexbox con gap en el CSS
 
 ### 🟢 Funcionalidades Futuras Sugeridas
-3. **Previsualización de archivos** - Ver miniaturas de imágenes antes de organizar
-4. **Búsqueda en tiempo real** - Filtrar archivos por nombre/categoría
-5. **Exportar a Excel** - Además de CSV, opción de Excel
-6. **Programar organización** - Ejecutar automáticamente cada cierto tiempo
-7. **Undo/Deshacer** - Revertir la última organización
+2. **Previsualización de archivos** - Ver miniaturas de imágenes antes de organizar
+3. **Búsqueda en tiempo real** - Filtrar archivos por nombre/categoría
+4. **Exportar a Excel** - Además de CSV, opción de Excel
+5. **Programar organización** - Ejecutar automáticamente cada cierto tiempo
+6. **Undo/Deshacer** - Revertir la última organización
 
 ---
 
@@ -92,7 +92,7 @@ proyecto_drive_ordenado/
 ├── backup/
 │   ├── CONTEXT.md          # Este archivo
 │   ├── TODO.md             # Tareas pendientes y completadas
-│   └── fotos_referencias/  # Capturas de errores/mejoras
+│   └── fotos_referencias/  # Carpeta para capturas (actualmente vacía)
 ├── templates/
 │   ├── index.html          # Página principal (formulario)
 │   ├── result.html         # Página de resultados
@@ -125,9 +125,8 @@ proyecto_drive_ordenado/
 
 ### Componentes Desplegables
 - Clase: `.expandable-header`, `.expandable-content`
-- Íconos: ⌄ (cerrado), ⌃ (abierto)
-- Color: var(--color-primary) para visibilidad
 - Transición: 0.3s ease
+- **Nota**: Los iconos ⌄/⌃ fueron eliminados por solicitud del usuario
 
 ### Tarjetas Desplegables
 - Lupa 🔍 en esquina superior derecha (position: absolute)
@@ -140,9 +139,9 @@ proyecto_drive_ordenado/
 
 | Gráfica | Tipo | Estado | Ubicación |
 |---------|------|--------|-----------|
-| Distribución por Categoría | Doughnut | ✅ Activa | Arriba, izquierda |
-| Archivos por Año | Bar | ✅ Activa | Arriba, derecha (oculta si 1 año) |
-| Extensiones Principales | Pie | ✅ Activa | Abajo, centrada |
+| Distribución por Categoría | Doughnut | ✅ Activa | Primera, ancho completo |
+| Archivos por Año | Bar | ✅ Activa | Segunda, ancho completo (oculta si 1 año) |
+| Extensiones Principales | Pie | ✅ Activa | Tercera, ancho completo, leyenda abajo |
 | Distribución de Tamaños | Bar | ❌ Eliminada | N/A |
 
 ---
@@ -152,7 +151,7 @@ proyecto_drive_ordenado/
 - Implementado en: `index.html`, `result.html`, `report.html`
 - Persistencia: `localStorage` con clave `'tema'`
 - Valores: `'dark'` o `'light'`
-- Toggle: Botón 🌙/️ en header (esquina superior izquierda)
+- Toggle: Botón 🌙/☀️ en header (esquina superior derecha)
 - Las gráficas Chart.js se recargan al cambiar tema para aplicar nuevos colores
 
 ---
@@ -181,6 +180,8 @@ drive.mount('/content/drive')
 3. **Túnel**: Usa `cloudflared` con trycloudflare (URLs temporales)
 4. **CSV**: Columnas: nombre_original, extension, categoria, tamaño_bytes, fecha_modificacion, ruta_destino, es_duplicado
 5. **Gráfica de años**: No se renderiza si `estadisticas.resumen.años_cubiertos|length <= 1`
+6. **Favicon**: Emoji 📁 como SVG data URI (sin dependencias externas)
+7. **Theme toggle**: Posicionado con `position: absolute; top: 8px; right: 8px`
 
 ---
 
@@ -188,6 +189,7 @@ drive.mount('/content/drive')
 
 - Repositorio: https://github.com/Danko3104/Proyecto_Drive_Ordenado.git
 - Túnel se genera automáticamente al ejecutar
+- Google Drive: https://drive.google.com (acceso directo desde botones de la app)
 
 ---
 
@@ -198,14 +200,21 @@ drive.mount('/content/drive')
 3. **Sin base de datos**: Todo se maneja con archivos CSV y variables en memoria
 4. **Sesión única**: No hay persistencia entre reinicios del servidor
 5. **Lupa en tarjetas**: Indica visualmente que la tarjeta es desplegable
+6. **Gráficas apiladas**: Distribución vertical en una columna para mejor legibilidad
+7. **Favicon emoji**: Evita depender de archivos externos que puedan romperse
 
 ---
 
 ## 🐛 Último Error Conocido
 
 **Fecha**: 2026-05-28
-**Problema**: Los duplicados aparecen en el resultado pero no se muestra el detalle en el reporte
-**Estado**: Investigar función `generar_reporte_csv()` en `reporter.py`
+**Estado**: ✅ Todos los bugs críticos resueltos
+**Últimos cambios**:
+- Layout de tarjetas corregido a grid CSS
+- Gráficas del reporte reorganizadas en columna única
+- Iconos de flecha eliminados de secciones desplegables
+- Theme toggle reposicionado
+- Botón de acceso a Drive agregado
 
 ---
 
