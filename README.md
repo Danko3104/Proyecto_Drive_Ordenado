@@ -42,7 +42,49 @@ Aplicación web que automatiza la organización de archivos en Google Drive mont
 
 ---
 
-## 🚀 Cómo usar en Google Colab (2 Opciones)
+## 🆕 ¿Nunca has usado Google Colab? Empieza aquí
+
+Si es tu primera vez con Colab, sigue estos pasos para crear tu archivo:
+
+### Paso A: Crear un nuevo notebook
+
+1. **Abre tu navegador** y ve a: [https://colab.research.google.com](https://colab.research.google.com)
+2. Haz clic en **"Nuevo cuaderno"** (o "New notebook" si está en inglés)
+3. Se abrirá una página con una celda de código lista para usar
+
+### Paso B: Agregar celdas de código
+
+Las celdas son los cuadritos donde escribes los comandos. Para agregar más:
+
+- **Método 1:** Haz clic en el botón **"+ Código"** (aparece arriba o en la barra lateral)
+- **Método 2:** Presiona `Ctrl + M` y luego `B` (agrega celda debajo)
+
+Verás un cuadrito gris donde puedes escribir. Eso es una celda de código.
+
+### Paso C: Cambiar entre celdas de código y texto (opcional)
+
+- Para escribir **código**: Deja como está (dice "Código" o "Code" arriba a la izquierda de la celda)
+- Para escribir **texto explicativo**: Haz clic en el menú desplegable donde dice "Código" y cambia a "Texto"
+
+### Paso D: Ejecutar una celda
+
+Después de escribir o pegar código en una celda:
+
+- **Haz clic en el ▶️ (botón de play)** a la izquierda de la celda
+- **O presiona:** `Ctrl + Enter` (ejecuta y se queda) o `Shift + Enter` (ejecuta y pasa a la siguiente)
+
+Cuando ejecutas, verás un círculo girando ⏳ mientras procesa, y luego el resultado abajo.
+
+### Paso E: Guardar tu trabajo
+
+- Colab guarda automáticamente en tu Google Drive
+- O puedes ir a **Archivo → Guardar** (Ctrl + S)
+
+---
+
+## 🚀 Cómo usar Drive Ordenado en Google Colab (2 Opciones)
+
+Ahora que sabes cómo usar Colab, elige una de estas dos formas:
 
 ### ⚡ OPCIÓN 1: RÁPIDA (Recomendada)
 
