@@ -24,6 +24,8 @@ Aplicación web que automatiza la organización de archivos en Google Drive mont
 - **Preview antes de organizar** con resumen de archivos y estadísticas
 - **Detección de duplicados** mediante hash MD5
 - **Generación de reportes CSV** con estadísticas detalladas
+- **Gráficas interactivas** en el reporte (dona y barras)
+- **Lista de duplicados desplegable** con ubicaciones
 - **Modo oscuro/claro** 🌙☀️ - elige tu tema preferido
 - **Interfaz web moderna** y responsive
 - **Acceso público** mediante tunneling con trycloudflare
@@ -289,9 +291,18 @@ Una vez dentro de la app verás:
 ### 3. Después de organizar
 
 Puedes:
-- Ver el reporte detallado en el navegador
-- Descargar el archivo CSV con todos los datos
-- Ver las estadísticas de cuánto moviste
+- **Ver el reporte detallado** en el navegador con:
+  - 📊 **Gráficas** de distribución por categoría (dona) y por año (barras)
+  - 🔍 **Sección de duplicados** desplegable con lista detallada y ubicaciones
+  - 📈 Tablas de distribución por año y extensiones
+  - 📋 Ejemplo del formato CSV
+- **Descargar el archivo CSV** con todos los datos
+- **Ver las estadísticas** de cuánto moviste
+
+**Características del reporte detallado:**
+- **Gráficas interactivas**: Visualiza la distribución de archivos
+- **Modo oscuro/claro**: El reporte respeta tu tema elegido
+- **Duplicados desplegables**: Haz clic en "Archivos Duplicados" para ver el listado completo con hash y ubicaciones
 
 ---
 
