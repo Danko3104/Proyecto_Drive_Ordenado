@@ -1452,8 +1452,14 @@ code {
 }
 
 .expandable-icon {
-    font-size: 1.2rem;
-    color: var(--color-text-light);
+    font-size: 1rem;
+    color: var(--color-primary);
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+.expandable-header[onclick] .expandable-icon {
+    display: inline-block;
 }
 
 .expandable-count {
