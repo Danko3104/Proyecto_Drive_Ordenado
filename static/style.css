@@ -1322,10 +1322,9 @@ code {
 
 .charts-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: var(--spacing);
     margin-top: var(--spacing-md);
-    align-items: start;
 }
 
 @media (max-width: 768px) {
@@ -1349,7 +1348,7 @@ code {
 }
 
 .chart-container canvas {
-    max-height: 220px;
+    max-height: 320px;
     height: auto;
 }
 
