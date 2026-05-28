@@ -286,16 +286,47 @@ def reporte():
     if not resultado:
         return render_template('index.html', mensaje='No hay reporte disponible')
 
-    # Cargar datos para la tabla
-    archivos = []
-    if resultado and 'estadisticas' in resultado:
-        # Reconstruir lista de archivos desde las estadísticas
-        # En una implementación real, guardaríamos la lista completa
-        pass
+    # Cargar datos de duplicados desde el CSV si existe
+    duplicados_detalle = []
+    ruta_reporte = resultado.get('ruta_reporte')
+
+    if ruta_reporte and os.path.exists(ruta_reporte):
+        try:
+            import csv
+            from collections import defaultdict
+
+            # Agrupar archivos por hash para encontrar duplicados
+            grupos_por_hash = defaultdict(list)
+
+            with open(ruta_reporte, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if row.get('es_duplicado', '').lower() == 'si':
+                        # Usar ruta_destino como identificador único
+                        hash_key = row.get('ruta_destino', '') + row.get('tamaño_bytes', '')
+                        grupos_por_hash[hash_key].append({
+                            'nombre': row.get('nombre_original', ''),
+                            'ruta': row.get('ruta_destino', ''),
+                            'tamaño': row.get('tamaño_bytes', '')
+                        })
+
+            # Crear lista de duplicados con sus ubicaciones
+            for hash_key, archivos in grupos_por_hash.items():
+                if len(archivos) > 1:
+                    duplicados_detalle.append({
+                        'nombre': archivos[0]['nombre'],
+                        'hash': hash_key[:32],
+                        'ubicaciones': [a['ruta'] for a in archivos],
+                        'cantidad': len(archivos)
+                    })
+
+        except Exception as e:
+            print(f"Error al leer duplicados del CSV: {e}")
 
     return render_template('report.html',
                           estadisticas=resultado.get('estadisticas') if resultado else None,
-                          timestamp=resultado.get('timestamp') if resultado else None)
+                          timestamp=resultado.get('timestamp') if resultado else None,
+                          duplicados_detalle=duplicados_detalle)
 
 
 @app.route('/descargar_reporte')

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte Detallado - Drive Ordenado</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -28,43 +29,48 @@
                     <span class="timestamp">{{ timestamp }}</span>
                 </div>
 
+                <!-- SECCIÓN DE GRÁFICAS -->
                 <div class="report-section">
-                    <h3 class="section-title">Contenido del CSV Generado</h3>
-                    <p class="report-description">
-                        El archivo <code>reporte_organizacion.csv</code> contiene la siguiente información para cada archivo:
-                    </p>
-
-                    <div class="csv-columns">
-                        <div class="column-item">
-                            <span class="column-name">nombre_original</span>
-                            <span class="column-desc">Nombre del archivo original</span>
+                    <h3 class="section-title">📊 Gráficas de Distribución</h3>
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h4>Por Categoría</h4>
+                            <canvas id="chartCategorias"></canvas>
                         </div>
-                        <div class="column-item">
-                            <span class="column-name">extension</span>
-                            <span class="column-desc">Extensión del archivo</span>
-                        </div>
-                        <div class="column-item">
-                            <span class="column-name">categoria</span>
-                            <span class="column-desc">Categoría asignada (documentos, imágenes, etc.)</span>
-                        </div>
-                        <div class="column-item">
-                            <span class="column-name">tamaño_bytes</span>
-                            <span class="column-desc">Tamaño en bytes</span>
-                        </div>
-                        <div class="column-item">
-                            <span class="column-name">fecha_modificacion</span>
-                            <span class="column-desc">Fecha de última modificación</span>
-                        </div>
-                        <div class="column-item">
-                            <span class="column-name">ruta_destino</span>
-                            <span class="column-desc">Ubicación final después de organizar</span>
-                        </div>
-                        <div class="column-item">
-                            <span class="column-name">es_duplicado</span>
-                            <span class="column-desc">Indica si es un archivo duplicado</span>
+                        <div class="chart-container">
+                            <h4>Por Año</h4>
+                            <canvas id="chartAños"></canvas>
                         </div>
                     </div>
                 </div>
+
+                <!-- SECCIÓN DE DUPLICADOS DESPLEGABLE -->
+                {% if duplicados_detalle and duplicados_detalle|length > 0 %}
+                <div class="report-section">
+                    <h3 class="section-title" style="cursor: pointer;" onclick="toggleDuplicados()">
+                        🔍 Archivos Duplicados
+                        <span id="toggleIcon" style="float: right;">▼</span>
+                    </h3>
+                    <div id="duplicadosSection" style="display: none;">
+                        <p class="report-description">
+                            Se encontraron {{ estadisticas.duplicados.cantidad }} archivos duplicados ocupando {{ estadisticas.duplicados.espacio_ocupado_mb }} MB:
+                        </p>
+                        <div class="duplicados-lista">
+                            {% for dup in duplicados_detalle %}
+                            <div class="duplicado-item">
+                                <div class="duplicado-nombre">📄 {{ dup.nombre }}</div>
+                                <div class="duplicado-hash">Hash: {{ dup.hash[:16] }}...</div>
+                                <div class="duplicado-ubicaciones">
+                                    {% for ubicacion in dup.ubicaciones %}
+                                    <div class="ubicacion">📍 {{ ubicacion }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
 
                 <div class="report-section">
                     <h3 class="section-title">Distribución por Año</h3>
@@ -170,6 +176,7 @@ documento.docx,.docx,documentos,45200,2024-05-22 16:20:00,/ruta/destino/Document
             <p class="footer-authors">Mendoza Gomez Eleangie Valentina | Tavera Carreño Daniel José</p>
         </footer>
     </div>
+
     <script>
         // Script minimal para modo oscuro en reporte
         (function() {
@@ -202,6 +209,9 @@ documento.docx,.docx,documentos,45200,2024-05-22 16:20:00,/ruta/destino/Document
                 html.setAttribute('data-theme', nuevoTema);
                 localStorage.setItem('tema', nuevoTema);
                 actualizarIconoTema(nuevoTema);
+
+                // Actualizar gráficas si existen
+                actualizarColoresGraficas();
             }
 
             if (themeToggle) {
@@ -210,6 +220,104 @@ documento.docx,.docx,documentos,45200,2024-05-22 16:20:00,/ruta/destino/Document
 
             inicializarTema();
         })();
+
+        // Función para desplegar/ocultar duplicados
+        function toggleDuplicados() {
+            const section = document.getElementById('duplicadosSection');
+            const icon = document.getElementById('toggleIcon');
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                icon.textContent = '▲';
+            } else {
+                section.style.display = 'none';
+                icon.textContent = '▼';
+            }
+        }
+
+        // Configuración de gráficas
+        {% if estadisticas %}
+        const chartColors = {
+            categorias: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+            años: ['#06b6d4', '#ec4899', '#84cc16', '#f97316']
+        };
+
+        // Gráfica de Categorías
+        {% if estadisticas.por_categoria %}
+        new Chart(document.getElementById('chartCategorias'), {
+            type: 'doughnut',
+            data: {
+                labels: [{% for cat in estadisticas.por_categoria.keys() %}'{{ cat.capitalize() }}'{% if not loop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for datos in estadisticas.por_categoria.values() %}{{ datos.cantidad }}{% if not loop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: chartColors.categorias,
+                    borderWidth: 2,
+                    borderColor: getComputedStyle(document.body).getPropertyValue('--color-card') || '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: getComputedStyle(document.body).getPropertyValue('--color-text') || '#1e293b'
+                        }
+                    }
+                }
+            }
+        });
+        {% endif %}
+
+        // Gráfica de Años
+        {% if estadisticas.por_año %}
+        new Chart(document.getElementById('chartAños'), {
+            type: 'bar',
+            data: {
+                labels: [{% for año in estadisticas.por_año.keys() %}'{{ año }}'{% if not loop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Archivos',
+                    data: [{% for datos in estadisticas.por_año.values() %}{{ datos.cantidad }}{% if not loop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: chartColors.años,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: getComputedStyle(document.body).getPropertyValue('--color-text') || '#1e293b'
+                        },
+                        grid: {
+                            color: getComputedStyle(document.body).getPropertyValue('--color-border') || '#e2e8f0'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: getComputedStyle(document.body).getPropertyValue('--color-text') || '#1e293b'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+        {% endif %}
+        {% endif %}
+
+        function actualizarColoresGraficas() {
+            // Recargar página para aplicar nuevos colores según tema
+            location.reload();
+        }
     </script>
 </body>
 </html>

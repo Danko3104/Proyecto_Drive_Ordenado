@@ -701,7 +701,7 @@ select:focus {
     background: var(--color-bg);
     border-radius: var(--radius);
     padding: var(--spacing);
-    font-family: 'Courier New', monospace;
+    font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
     font-size: 0.9rem;
 }
 
@@ -1144,4 +1144,97 @@ code {
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 0.85em;
+}
+
+/* ============================================
+   ESTILOS PARA GRÁFICAS EN REPORTE
+   ============================================ */
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+}
+
+.chart-container {
+    background: var(--color-bg);
+    border-radius: var(--radius);
+    padding: var(--spacing);
+    border: 1px solid var(--color-border);
+}
+
+.chart-container h4 {
+    text-align: center;
+    margin-bottom: var(--spacing);
+    color: var(--color-text);
+    font-size: 1rem;
+}
+
+.chart-container canvas {
+    max-height: 250px;
+}
+
+/* ============================================
+   ESTILOS PARA SECCIÓN DE DUPLICADOS
+   ============================================ */
+
+.duplicados-lista {
+    margin-top: var(--spacing);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.duplicado-item {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--spacing);
+    margin-bottom: var(--spacing-sm);
+}
+
+.duplicado-nombre {
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 1rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.duplicado-hash {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-sm);
+    padding: 4px 8px;
+    background: var(--color-card);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+}
+
+.duplicado-ubicaciones {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ubicacion {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    padding-left: var(--spacing);
+    word-break: break-all;
+}
+
+/* Scrollbar para lista de duplicados */
+.duplicados-lista::-webkit-scrollbar {
+    width: 6px;
+}
+
+.duplicados-lista::-webkit-scrollbar-track {
+    background: var(--color-bg);
+    border-radius: 3px;
+}
+
+.duplicados-lista::-webkit-scrollbar-thumb {
+    background: var(--color-secondary);
+    border-radius: 3px;
 }
