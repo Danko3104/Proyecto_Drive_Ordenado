@@ -53,14 +53,20 @@ Aplicación web que automatiza la organización de archivos en Google Drive mont
 
 ### Paso 1: Montar Google Drive
 
+Ejecuta esto en una celda de código:
+
 ```python
 from google.colab import drive
 drive.mount('/content/drive')
 ```
 
-### Paso 2: Clonar el repositorio
+### Paso 2: Clonar el repositorio (SIEMPRE FRESH)
 
 ```bash
+# Eliminar si existe de antes (para asegurar código actualizado)
+!rm -rf Proyecto_Drive_Ordenado
+
+# Clonar el repositorio
 !git clone https://github.com/Danko3104/Proyecto_Drive_Ordenado.git
 ```
 
@@ -70,26 +76,61 @@ drive.mount('/content/drive')
 cd Proyecto_Drive_Ordenado
 ```
 
-### Paso 4: Ejecutar el script de inicio
+### Paso 4: Instalar dependencias
 
 ```bash
-!bash start.sh
+!pip install flask pandas numpy
 ```
 
-Este script automáticamente:
-- Instala todas las dependencias de Python
-- Descarga cloudflared si no está presente
-- Inicia el servidor Flask en el puerto 5000
-- Crea un túnel público con trycloudflare
+### Paso 5: Descargar cloudflared
 
-### Paso 5: Acceder a la aplicación
+```bash
+!wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+!chmod +x cloudflared-linux-amd64
+```
 
-Una vez iniciado, verás en la consola una URL como:
+### Paso 6: Iniciar el servidor Flask
+
+En una celda separada (esto debe quedar corriendo):
+
+```bash
+!python3 app.py &
+```
+
+### Paso 7: Crear túnel público
+
+Espera 3-5 segundos después del paso anterior, luego ejecuta:
+
+```bash
+!./cloudflared-linux-amd64 tunnel --url http://localhost:5000
+```
+
+Después de unos segundos verás una URL como:
 ```
 https://xxxx-xxxx-xxxx.trycloudflare.com
 ```
 
-Haz clic en esa URL o copia y pégala en tu navegador.
+Haz clic en esa URL para abrir la aplicación.
+
+---
+
+## 🌓 Características de la interfaz
+
+- **Modo Oscuro/Claro**: Botón 🌙/☀️ en la esquina superior derecha para cambiar tema
+- **Preview antes de organizar**: Muestra estadísticas antes de mover archivos
+- **Advertencia de seguridad**: Alerta si intentas organizar todo tu Drive
+
+---
+
+## 📝 Notas importantes
+
+⚠️ **Si recargas la página y no ves los cambios:**
+- Presiona `Ctrl + Shift + R` para forzar recarga sin caché
+- O abre en una pestaña de incógnito
+
+⚠️ **Para volver a ejecutar:**
+- Si el túnel se cae, solo ejecuta el Paso 7 nuevamente
+- Si quieres reiniciar todo, ejecuta desde el Paso 2
 
 ---
 
