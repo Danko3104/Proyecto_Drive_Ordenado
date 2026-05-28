@@ -800,30 +800,33 @@ select:focus {
 .extension-list {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-xs);
+    justify-content: center;
+    gap: var(--spacing-sm);
 }
 
 .extension-badge {
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-xs);
-    padding: 4px 12px;
+    padding: 6px 16px;
     background: var(--color-primary);
     color: white;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
 .ext-name {
     font-family: 'Courier New', monospace;
     font-weight: 600;
+    text-transform: uppercase;
 }
 
 .ext-count {
     background: rgba(255,255,255,0.2);
-    padding: 2px 8px;
+    padding: 2px 10px;
     border-radius: 10px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
 }
 
 /* Resumen estadístico */
@@ -1080,7 +1083,7 @@ code {
 }
 
 .preview-section-title {
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: var(--spacing-sm);
     color: var(--color-text);
@@ -1096,25 +1099,27 @@ code {
 
 .preview-extension-badge {
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     gap: var(--spacing-xs);
     background: var(--color-card);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm) var(--spacing);
+    border-radius: var(--radius);
     border: 1px solid var(--color-border);
-    font-size: 0.85rem;
+    min-width: 70px;
 }
 
 .extension-name {
     font-weight: 600;
     color: var(--color-primary);
     text-transform: uppercase;
+    font-size: 0.9rem;
 }
 
 .extension-count {
     background: var(--color-primary);
     color: white;
-    padding: 2px 8px;
+    padding: 2px 10px;
     border-radius: var(--radius-sm);
     font-size: 0.75rem;
     font-weight: 600;
