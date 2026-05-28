@@ -38,6 +38,7 @@
                 </div>
 
                 <div class="stats-grid">
+                    <!-- Primera fila: Información principal -->
                     <div class="stat-card stat-primary">
                         <div class="stat-icon">📄</div>
                         <div class="stat-value" id="statTotal">{{ resultado.archivos_procesados }}</div>
@@ -56,14 +57,6 @@
                         <div class="stat-label">MB totales</div>
                     </div>
 
-                    {% if resultado.estadisticas.carpetas_eliminadas.total > 0 %}
-                    <div class="stat-card stat-info expandable-card" onclick="toggleSection('carpetasSection', 'carpIcon')">
-                        <div class="stat-icon">🗑️</div>
-                        <div class="stat-value" id="statCarpetas">{{ resultado.estadisticas.carpetas_eliminadas.total }}</div>
-                        <div class="stat-label">Carpetas elim. ▼</div>
-                    </div>
-                    {% endif %}
-
                     {% if resultado.estadisticas.duplicados.cantidad > 0 %}
                     <div class="stat-card stat-warning expandable-card" onclick="toggleSection('duplicadosSection', 'dupIcon')">
                         <div class="stat-icon">🔍</div>
@@ -75,6 +68,14 @@
                         <div class="stat-icon">✅</div>
                         <div class="stat-value">0</div>
                         <div class="stat-label">Duplicados</div>
+                    </div>
+                    {% endif %}
+
+                    {% if resultado.estadisticas.carpetas_eliminadas.total > 0 %}
+                    <div class="stat-card stat-info expandable-card" onclick="toggleSection('carpetasSection', 'carpIcon')">
+                        <div class="stat-icon">🗑️</div>
+                        <div class="stat-value" id="statCarpetas">{{ resultado.estadisticas.carpetas_eliminadas.total }}</div>
+                        <div class="stat-label">Carpetas elim. ▼</div>
                     </div>
                     {% endif %}
                 </div>

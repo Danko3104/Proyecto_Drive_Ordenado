@@ -1282,6 +1282,15 @@ code {
     max-height: 250px;
 }
 
+/* Espaciado entre gráficas y secciones desplegables */
+.chart-container + .chart-container {
+    margin-bottom: var(--spacing-lg);
+}
+
+.report-section {
+    margin-bottom: var(--spacing-lg);
+}
+
 /* ============================================
    ESTILOS PARA SECCIÓN DE DUPLICADOS
    ============================================ */
@@ -1369,6 +1378,7 @@ code {
     border-radius: var(--radius);
     cursor: pointer;
     transition: background 0.2s ease;
+    margin-top: var(--spacing-md);
     margin-bottom: var(--spacing);
 }
 
