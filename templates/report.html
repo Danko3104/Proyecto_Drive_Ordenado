@@ -80,7 +80,10 @@
                 <!-- DISTRIBUCIÓN POR AÑO (DESPLEGABLE) -->
                 <div class="report-section">
                     <div class="expandable-header" onclick="toggleDuplicados('añosSection', 'añosIcon')">
-                        <h3 class="section-title" style="margin: 0;">📅 Distribución por Año</h3>
+                        <h3 class="section-title" style="margin: 0;">
+                            📅 Distribución por Año
+                            <span class="expandable-count">{{ estadisticas.resumen.años_cubiertos|length }} años</span>
+                        </h3>
                         <span class="expandable-icon" id="añosIcon">▼</span>
                     </div>
                     <div id="añosSection" style="display: none; margin-top: var(--spacing);">
