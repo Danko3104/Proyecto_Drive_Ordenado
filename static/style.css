@@ -510,33 +510,21 @@ select:focus {
 
 /* Stats Grid */
 .stats-grid {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: var(--spacing);
     padding: var(--spacing-lg);
-    justify-content: flex-start;
 }
 
-.stats-grid .stat-card {
-    flex: 1 1 160px;
-    max-width: 200px;
-}
-
-@media (max-width: 1200px) {
-    .stats-grid .stat-card {
-        flex: 1 1 200px;
+@media (max-width: 640px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 900px) {
-    .stats-grid .stat-card {
-        flex: 1 1 45%;
-    }
-}
-
-@media (max-width: 600px) {
-    .stats-grid .stat-card {
-        flex: 1 1 100%;
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
     }
 }
 
