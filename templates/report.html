@@ -38,10 +38,12 @@
                             <h4>Distribución por Categoría</h4>
                             <canvas id="chartCategorias"></canvas>
                         </div>
+                        {% if estadisticas.resumen.años_cubiertos|length > 1 %}
                         <div class="chart-container">
                             <h4>Archivos por Año</h4>
                             <canvas id="chartAños"></canvas>
                         </div>
+                        {% endif %}
                     </div>
                     <div class="chart-container" style="max-width: 500px; margin: var(--spacing-lg) auto 0;">
                         <h4 style="text-align: center;">Extensiones Principales</h4>
@@ -292,8 +294,8 @@
         });
         {% endif %}
 
-        // Gráfica de Años
-        {% if estadisticas.por_año %}
+        // Gráfica de Años (solo si hay más de un año)
+        {% if estadisticas.por_año and estadisticas.resumen.años_cubiertos|length > 1 %}
         new Chart(document.getElementById('chartAños'), {
             type: 'bar',
             data: {
