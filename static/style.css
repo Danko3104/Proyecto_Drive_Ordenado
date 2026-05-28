@@ -511,9 +511,15 @@ select:focus {
 /* Stats Grid */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: var(--spacing);
     padding: var(--spacing-lg);
+}
+
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 @media (max-width: 900px) {
@@ -1323,7 +1329,6 @@ code {
     border-radius: var(--radius);
     padding: var(--spacing);
     border: 1px solid var(--color-border);
-    min-height: 300px;
 }
 
 .chart-container h4 {
@@ -1331,6 +1336,11 @@ code {
     margin-bottom: var(--spacing);
     color: var(--color-text);
     font-size: 1rem;
+}
+
+.chart-container canvas {
+    max-height: 300px;
+    height: 300px;
 }
 
 .chart-container canvas {
