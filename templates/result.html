@@ -38,17 +38,19 @@
                 </div>
 
                 <div class="stats-grid">
-                    <!-- Primera fila: Información principal -->
+                    <!-- Tarjetas desplegables con lupa -->
                     <div class="stat-card stat-primary expandable-card" onclick="toggleSection('archivosSection', 'archIcon')">
+                        <span class="card-toggle-icon">🔍</span>
                         <div class="stat-icon">📄</div>
                         <div class="stat-value" id="statTotal">{{ resultado.archivos_procesados }}</div>
-                        <div class="stat-label">Archivos procesados ⌄</div>
+                        <div class="stat-label">Archivos procesados</div>
                     </div>
 
                     <div class="stat-card stat-success expandable-card" onclick="toggleSection('categoriasSection', 'catIcon')">
+                        <span class="card-toggle-icon">🔍</span>
                         <div class="stat-icon">📂</div>
                         <div class="stat-value" id="statCategorias">{{ resultado.estadisticas.resumen.total_categorias }}</div>
-                        <div class="stat-label">Categorías ⌄</div>
+                        <div class="stat-label">Categorías</div>
                     </div>
 
                     <div class="stat-card stat-info">
@@ -59,9 +61,10 @@
 
                     {% if resultado.estadisticas.duplicados.cantidad > 0 %}
                     <div class="stat-card stat-warning expandable-card" onclick="toggleSection('duplicadosSection', 'dupIcon')">
+                        <span class="card-toggle-icon">🔍</span>
                         <div class="stat-icon">🔍</div>
                         <div class="stat-value" id="statDuplicados">{{ resultado.estadisticas.duplicados.cantidad }}</div>
-                        <div class="stat-label">Duplicados ⌄</div>
+                        <div class="stat-label">Duplicados</div>
                     </div>
                     {% else %}
                     <div class="stat-card stat-success">
@@ -73,9 +76,10 @@
 
                     {% if resultado.estadisticas.carpetas_eliminadas.total > 0 %}
                     <div class="stat-card stat-info expandable-card" onclick="toggleSection('carpetasSection', 'carpIcon')">
+                        <span class="card-toggle-icon">🔍</span>
                         <div class="stat-icon">🗑️</div>
                         <div class="stat-value" id="statCarpetas">{{ resultado.estadisticas.carpetas_eliminadas.total }}</div>
-                        <div class="stat-label">Carpetas eliminadas ⌄</div>
+                        <div class="stat-label">Carpetas eliminadas</div>
                     </div>
                     {% endif %}
                 </div>

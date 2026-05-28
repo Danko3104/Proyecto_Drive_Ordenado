@@ -22,22 +22,31 @@
 - [x] Generación de reportes CSV
 - [x] Modo oscuro/claro con persistencia en localStorage
 - [x] Interfaz web responsive
+- [x] Eliminación automática de carpetas vacías
 
 ### Gráficas en Reporte
 - [x] Distribución por Categoría (doughnut)
-- [x] Archivos por Año (barras)
+- [x] Archivos por Año (barras) - se oculta si solo hay 1 año
 - [x] Extensiones Principales (pie) - centrada
 - [ ] ~~Distribución de Tamaños~~ (eliminada por solicitud del usuario)
 
 ### Secciones Desplegables en Reporte
 - [x] Archivos Duplicados (con lista detallada)
-- [x] Distribución por Año (tabla)
-- [x] Extensiones Encontradas (badges)
+- [x] Distribución por Año (tabla) - con badge "X años"
+- [x] Extensiones Encontradas (badges) - con badge "X tipos"
 - [x] Resumen Estadístico
 
 ### Secciones Desplegables en Resultados
+- [x] Archivos procesados → Estadísticas Adicionales
 - [x] Distribución por Categoría (desde tarjeta clickeable)
 - [x] Archivos Duplicados (desde tarjeta clickeable, si existen)
+- [x] Carpetas Vacías Eliminadas (desde tarjeta clickeable)
+
+### UI/UX
+- [x] Lupa 🔍 en esquina superior derecha de tarjetas desplegables
+- [x] Íconos ⌄/⌃ para secciones colapsables
+- [x] Grid flexible para tarjetas de resultados
+- [x] Badges informativos en headers desplegables
 
 ---
 
@@ -48,7 +57,7 @@
    - El template `report.html` verifica `{% if duplicados_detalle and duplicados_detalle|length > 0 %}`
    - La función `reporte()` en `app.py` carga los duplicados desde el CSV
    - **Problema**: Los duplicados no se están mostrando aunque existan en el CSV
-   - **Posible causa**: El CSV no tiene la columna `es_duplicado` correctamente poblada o el hash no está generándose bien
+   - **Posible causa**: El CSV no tiene la columna `es_duplicado` correctamente poblada
    - **Ubicación**: Revisar `reporter.py` función `generar_reporte_csv()`
 
 ### 🟡 Mejoras Visuales
@@ -57,15 +66,12 @@
    - Se agregó un `span` con margen entre ellos como solución temporal
    - **Podría mejorarse**: Con flexbox y gap en el CSS
 
-3. **Responsive de Gráficas**
-   - Las gráficas se adaptan pero podrían optimizarse mejor para móviles
-
 ### 🟢 Funcionalidades Futuras Sugeridas
-4. **Previsualización de archivos** - Ver miniaturas de imágenes antes de organizar
-5. **Búsqueda en tiempo real** - Filtrar archivos por nombre/categoría
-6. **Exportar a Excel** - Además de CSV, opción de Excel
-7. **Programar organización** - Ejecutar automáticamente cada cierto tiempo
-8. **Undo/Deshacer** - Revertir la última organización
+3. **Previsualización de archivos** - Ver miniaturas de imágenes antes de organizar
+4. **Búsqueda en tiempo real** - Filtrar archivos por nombre/categoría
+5. **Exportar a Excel** - Además de CSV, opción de Excel
+6. **Programar organización** - Ejecutar automáticamente cada cierto tiempo
+7. **Undo/Deshacer** - Revertir la última organización
 
 ---
 
@@ -84,7 +90,9 @@ proyecto_drive_ordenado/
 ├── tunnel.py               # Script alternativo para túnel
 ├── README.md               # Documentación principal
 ├── backup/
-│   └── CONTEXT.md          # Este archivo
+│   ├── CONTEXT.md          # Este archivo
+│   ├── TODO.md             # Tareas pendientes y completadas
+│   └── fotos_referencias/  # Capturas de errores/mejoras
 ├── templates/
 │   ├── index.html          # Página principal (formulario)
 │   ├── result.html         # Página de resultados
@@ -117,8 +125,14 @@ proyecto_drive_ordenado/
 
 ### Componentes Desplegables
 - Clase: `.expandable-header`, `.expandable-content`
-- Iconos: ▼ (cerrado), ▲ (abierto)
+- Íconos: ⌄ (cerrado), ⌃ (abierto)
+- Color: var(--color-primary) para visibilidad
 - Transición: 0.3s ease
+
+### Tarjetas Desplegables
+- Lupa 🔍 en esquina superior derecha (position: absolute)
+- Solo en tarjetas con clase `.expandable-card`
+- Opacidad aumenta al hover
 
 ---
 
@@ -127,7 +141,7 @@ proyecto_drive_ordenado/
 | Gráfica | Tipo | Estado | Ubicación |
 |---------|------|--------|-----------|
 | Distribución por Categoría | Doughnut | ✅ Activa | Arriba, izquierda |
-| Archivos por Año | Bar | ✅ Activa | Arriba, derecha |
+| Archivos por Año | Bar | ✅ Activa | Arriba, derecha (oculta si 1 año) |
 | Extensiones Principales | Pie | ✅ Activa | Abajo, centrada |
 | Distribución de Tamaños | Bar | ❌ Eliminada | N/A |
 
@@ -138,7 +152,7 @@ proyecto_drive_ordenado/
 - Implementado en: `index.html`, `result.html`, `report.html`
 - Persistencia: `localStorage` con clave `'tema'`
 - Valores: `'dark'` o `'light'`
-- Toggle: Botón 🌙/☀️ en header
+- Toggle: Botón 🌙/️ en header (esquina superior izquierda)
 - Las gráficas Chart.js se recargan al cambiar tema para aplicar nuevos colores
 
 ---
@@ -164,8 +178,9 @@ drive.mount('/content/drive')
 
 1. **Versión de CSS**: Se usa `?v=2.0` o `?v=3.0` para evitar caché del navegador
 2. **Chart.js**: Cargado desde CDN `https://cdn.jsdelivr.net/npm/chart.js`
-3. **Túnel**: Usa `cloudflared` con trycloudflare ( URLs temporales )
+3. **Túnel**: Usa `cloudflared` con trycloudflare (URLs temporales)
 4. **CSV**: Columnas: nombre_original, extension, categoria, tamaño_bytes, fecha_modificacion, ruta_destino, es_duplicado
+5. **Gráfica de años**: No se renderiza si `estadisticas.resumen.años_cubiertos|length <= 1`
 
 ---
 
@@ -182,6 +197,7 @@ drive.mount('/content/drive')
 2. **Duplicados marcados, no eliminados**: El usuario decide qué hacer
 3. **Sin base de datos**: Todo se maneja con archivos CSV y variables en memoria
 4. **Sesión única**: No hay persistencia entre reinicios del servidor
+5. **Lupa en tarjetas**: Indica visualmente que la tarjeta es desplegable
 
 ---
 
@@ -193,4 +209,4 @@ drive.mount('/content/drive')
 
 ---
 
-**Para cualquier modelo que revise esto**: Revisa los issues abiertos en el README.md principal y verifica que las funcionalidades marcadas con ✅ funcionen correctamente antes de agregar nuevas features.
+**Para cualquier modelo que revise esto**: Revisa los issues abiertos en TODO.md y verifica que las funcionalidades marcadas con ✅ funcionen correctamente antes de agregar nuevas features.

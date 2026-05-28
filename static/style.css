@@ -510,27 +510,33 @@ select:focus {
 
 /* Stats Grid */
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--spacing);
     padding: var(--spacing-lg);
+    justify-content: flex-start;
+}
+
+.stats-grid .stat-card {
+    flex: 1 1 160px;
+    max-width: 200px;
 }
 
 @media (max-width: 1200px) {
-    .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
+    .stats-grid .stat-card {
+        flex: 1 1 200px;
     }
 }
 
 @media (max-width: 900px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .stats-grid .stat-card {
+        flex: 1 1 45%;
     }
 }
 
 @media (max-width: 600px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
+    .stats-grid .stat-card {
+        flex: 1 1 100%;
     }
 }
 
@@ -542,6 +548,7 @@ select:focus {
     border: 2px solid transparent;
     transition: var(--transition);
     cursor: default;
+    position: relative;
 }
 
 .stat-card.expandable-card {
@@ -556,6 +563,20 @@ select:focus {
 .stat-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow);
+}
+
+/* Lupa en esquina superior derecha para tarjetas desplegables */
+.card-toggle-icon {
+    position: absolute;
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
+    font-size: 1rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.stat-card.expandable-card:hover .card-toggle-icon {
+    opacity: 1;
 }
 
 .stat-primary {

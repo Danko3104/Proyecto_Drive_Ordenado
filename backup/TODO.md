@@ -22,12 +22,38 @@
 
 ## ✅ Completado
 
-### 5. Carpetas vacías después de organizar
+### 1. Carpetas vacías después de organizar
 **Estado**: ✅ RESUELTO - 2026-05-28
 **Solución**: 
 - Se agregó función `eliminar_carpetas_vacias()` en `organizer.py`
 - Elimina carpetas vacías recursivamente después de mover archivos
 - Se muestra contador en resultados con sección desplegable
+
+### 2. Layout de tarjetas en resultados
+**Estado**: ✅ RESUELTO - 2026-05-28
+**Solución**:
+- Grid flexible con flex-wrap para redistribuir tarjetas
+- Lupa 🔍 en esquina superior derecha de tarjetas desplegables
+- íconos de desplegar (⌄/⌃) solo en headers de secciones
+
+### 3. Gráficas del reporte
+**Estado**: ✅ RESUELTO - 2026-05-28
+**Solución**:
+- Gráficas con altura fija de 300px
+- Grid de 2 columnas iguales
+- Ocultar gráfica "Archivos por Año" si solo hay 1 año
+
+### 4. Badges informativos
+**Estado**: ✅ RESUELTO - 2026-05-28
+**Solución**:
+- Badge "X tipos" en Extensiones Encontradas
+- Badge "X años" en Distribución por Año
+
+### 5. Íconos de colapsar
+**Estado**: ✅ RESUELTO - 2026-05-28
+**Solución**:
+- Cambiar triángulos por ⌄ (cerrado) y ⌃ (abierto)
+- Color primary (azul) para mejor visibilidad
 
 ---
 
@@ -47,19 +73,6 @@
     gap: var(--spacing);
 }
 ```
-
----
-
-### 3. Tarjetas Clickeables en Resultados
-**Ubicación**: `templates/result.html`
-
-**Estado**: ✅ Implementado
-
-**Comportamiento**: 
-- La tarjeta de "Categorías" es clickeable y abre el detalle abajo
-- La tarjeta de "Duplicados" es clickeable (solo si hay duplicados)
-
-**Nota**: Asegurar que el cursor cambie a pointer al pasar sobre ellas.
 
 ---
 
@@ -102,7 +115,8 @@
 ## 📝 Documentación
 
 - [x] README principal actualizado
-- [x] Este archivo de contexto creado
+- [x] CONTEXT.md actualizado
+- [x] TODO.md actualizado
 - [ ] Agregar screenshots/gifs al README
 - [ ] Crear video tutorial de uso
 
@@ -129,11 +143,6 @@
 **Estado**: 🔴 Crítico
 **Descripción**: La sección de duplicados no aparece en report.html aunque sí hay duplicados
 **Asignado**: Por investigar
-
-### Bug #2: Tema Oscuro en Gráficas
-**Estado**: 🟡 Menor
-**Descripción**: Al cambiar a modo oscuro, las gráficas necesitan recargar la página
-**Solución**: Recargar página automáticamente o usar Chart.js con tema dinámico
 
 ---
 
