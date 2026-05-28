@@ -108,45 +108,68 @@ drive.mount('/content/drive')
 
 ### Paso 7: Crear túnel público
 
+**IMPORTANTE:** Esta celda debe quedarse corriendo. No la detengas o el enlace dejará de funcionar.
+
 ```python
 # Crear el enlace público para acceder desde cualquier navegador
+# Esta celda se queda ejecutando para mantener el túnel activo
 import subprocess
 import time
 import re
+import sys
 
-# Iniciar cloudflared en background
+print("⏳ Iniciando túnel...")
+print("="*60)
+
+# Iniciar cloudflared y capturar output
 process = subprocess.Popen(
     ['./cloudflared-linux-amd64', 'tunnel', '--url', 'http://localhost:5000'],
     stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT,
-    text=True
+    text=True,
+    bufsize=1
 )
 
-print("⏳ Generando enlace público...")
-time.sleep(8)
+url_mostrada = False
 
-# Leer output para encontrar la URL
-url = None
-for _ in range(50):
-    line = process.stdout.readline()
-    match = re.search(r'https://[a-z0-9-]+\.trycloudflare\.com', line)
-    if match:
-        url = match.group(0)
-        break
+# Leer output línea por línea
+for line in process.stdout:
+    line = line.strip()
+    
+    # Buscar y mostrar la URL cuando aparezca
+    if not url_mostrada:
+        match = re.search(r'https://[a-z0-9-]+\.trycloudflare\.com', line)
+        if match:
+            url = match.group(0)
+            print("\n" + "🎉"*20)
+            print("\n" + "="*60)
+            print("  ✅ TÚNEL LISTO - ABRE ESTA URL EN TU NAVEGADOR:")
+            print("="*60)
+            print(f"\n       {url}\n")
+            print("="*60)
+            print("  ⚠️  NO CIERRES ESTA CELDA O EL ENLADO DEJARÁ DE FUNCIONAR")
+            print("="*60 + "\n")
+            url_mostrada = True
+            continue
+    
+    # Mostrar solo mensajes importantes
+    if 'INF' in line:
+        if 'connection' in line.lower() or 'tunnel' in line.lower():
+            print(f"  [OK] {line.split('INF')[-1].strip()}")
+    elif 'error' in line.lower() or 'failed' in line.lower():
+        print(f"  [ERROR] {line}")
 
-if url:
-    print("\n" + "="*60)
-    print("🎉 ENLACE LISTO - ABRE ESTA URL:")
-    print("="*60)
-    print(f"\n    {url}\n")
-    print("="*60)
-    print("⚠️  Este enlace es temporal, cambia cada vez que reinicias")
-    print("="*60)
-else:
-    print("❌ No se pudo obtener la URL. Intenta ejecutar el paso 7 de nuevo.")
+try:
+    process.wait()
+except KeyboardInterrupt:
+    print("\n🛑 Deteniendo túnel...")
+    process.terminate()
+    sys.exit(0)
 ```
 
-**Haz clic en la URL que aparece arriba** para abrir la aplicación.
+**Después de ver la URL, ábrela en tu navegador.**
+
+⚠️ **IMPORTANTE:** Mantén esta celda ejecutándose. Si la detienes, el enlace dejará de funcionar.
 
 ---
 
