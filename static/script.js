@@ -12,6 +12,7 @@ let formDataGuardado = null;
 // Elementos del DOM
 document.addEventListener('DOMContentLoaded', function() {
     inicializarEventos();
+    inicializarTema();
 });
 
 /**
@@ -28,6 +29,55 @@ function inicializarEventos() {
     const inputRuta = document.getElementById('ruta_origen');
     if (inputRuta) {
         inputRuta.addEventListener('blur', validarRuta);
+    }
+
+    // Botón de cambio de tema
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTema);
+    }
+}
+
+/**
+ * Inicializa el tema según preferencia guardada o del sistema
+ */
+function inicializarTema() {
+    const temaGuardado = localStorage.getItem('tema');
+    const themeToggle = document.getElementById('themeToggle');
+
+    if (temaGuardado) {
+        document.documentElement.setAttribute('data-theme', temaGuardado);
+        actualizarIconoTema(themeToggle, temaGuardado);
+    } else {
+        // Detectar preferencia del sistema
+        const prefiereOscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const tema = prefiereOscuro ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', tema);
+        actualizarIconoTema(themeToggle, tema);
+    }
+}
+
+/**
+ * Cambia entre tema claro y oscuro
+ */
+function toggleTema() {
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const temaActual = html.getAttribute('data-theme');
+    const nuevoTema = temaActual === 'dark' ? 'light' : 'dark';
+
+    html.setAttribute('data-theme', nuevoTema);
+    localStorage.setItem('tema', nuevoTema);
+    actualizarIconoTema(themeToggle, nuevoTema);
+}
+
+/**
+ * Actualiza el icono del botón de tema
+ */
+function actualizarIconoTema(boton, tema) {
+    if (boton) {
+        boton.textContent = tema === 'dark' ? '☀️' : '🌙';
+        boton.title = tema === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
     }
 }
 
@@ -51,10 +101,9 @@ function manejarSubmit(e) {
         detectar_duplicados: document.getElementById('detectar_duplicados').checked
     };
 
-    // Validar ruta
+    // Si no se especifica ruta, usar MyDrive por defecto
     if (!formDataGuardado.ruta_origen) {
-        alert('Debe especificar una ruta de origen');
-        return;
+        formDataGuardado.ruta_origen = '/content/drive/MyDrive';
     }
 
     // Mostrar sección de progreso mientras se carga el preview
