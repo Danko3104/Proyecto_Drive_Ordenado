@@ -161,18 +161,18 @@ function mostrarPreview(preview) {
     // Actualizar estadísticas principales
     const totalEl = document.getElementById('previewTotal');
     const sizeEl = document.getElementById('previewSize');
-    const dupStatEl = document.getElementById('previewDupStat');
+    const dupSectionEl = document.getElementById('previewDupSection');
     const dupCountEl = document.getElementById('previewDupCount');
 
     if (totalEl) totalEl.textContent = preview.total_archivos;
     if (sizeEl) sizeEl.textContent = preview.tamaño_total_mb + ' MB';
 
-    // Mostrar duplicados si hay
+    // Mostrar sección de duplicados si hay
     if (preview.duplicados && preview.duplicados.cantidad > 0) {
-        if (dupStatEl) dupStatEl.style.display = 'flex';
+        if (dupSectionEl) dupSectionEl.classList.remove('hidden');
         if (dupCountEl) dupCountEl.textContent = preview.duplicados.cantidad;
     } else {
-        if (dupStatEl) dupStatEl.style.display = 'none';
+        if (dupSectionEl) dupSectionEl.classList.add('hidden');
     }
 
     // Generar lista de categorías
@@ -181,7 +181,9 @@ function mostrarPreview(preview) {
         categoriesContainer.innerHTML = '';
 
         const categorias = preview.categorias || {};
+        const porExtension = preview.por_extension || {};
 
+        // Renderizar categorías
         for (const [categoria, datos] of Object.entries(categorias)) {
             const catCard = document.createElement('div');
             catCard.className = 'preview-category-card';
@@ -201,6 +203,33 @@ function mostrarPreview(preview) {
             `;
 
             categoriesContainer.appendChild(catCard);
+        }
+
+        // Renderizar extensiones si hay
+        if (Object.keys(porExtension).length > 0) {
+            const extContainer = document.createElement('div');
+            extContainer.className = 'preview-extensions-container';
+            extContainer.innerHTML = `
+                <h4 class="preview-section-title">📎 Extensiones Encontradas</h4>
+                <div class="preview-extensions-grid" id="previewExtensions"></div>
+            `;
+            categoriesContainer.appendChild(extContainer);
+
+            const extensionsGrid = extContainer.querySelector('#previewExtensions');
+
+            // Ordenar extensiones por cantidad (mayor a menor)
+            const extensionesOrdenadas = Object.entries(porExtension)
+                .sort((a, b) => b[1].cantidad - a[1].cantidad);
+
+            for (const [ext, datos] of extensionesOrdenadas) {
+                const extBadge = document.createElement('div');
+                extBadge.className = 'preview-extension-badge';
+                extBadge.innerHTML = `
+                    <span class="extension-name">${ext}</span>
+                    <span class="extension-count">${datos.cantidad}</span>
+                `;
+                extensionsGrid.appendChild(extBadge);
+            }
         }
     }
 

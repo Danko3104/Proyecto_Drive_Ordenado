@@ -20,6 +20,17 @@
 
 ---
 
+## ✅ Completado
+
+### 5. Carpetas vacías después de organizar
+**Estado**: ✅ RESUELTO - 2026-05-28
+**Solución**: 
+- Se agregó función `eliminar_carpetas_vacias()` en `organizer.py`
+- Elimina carpetas vacías recursivamente después de mover archivos
+- Se muestra contador en resultados con sección desplegable
+
+---
+
 ## 🎨 Mejoras Visuales
 
 ### 2. Navegación del Reporte
