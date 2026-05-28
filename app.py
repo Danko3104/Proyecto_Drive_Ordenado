@@ -249,20 +249,14 @@ def ejecutar_organizacion(ruta_origen: str, ruta_destino: str,
                 'destino': estadisticas.get('carpetas_eliminadas_destino', 0)
             }
 
-        # Guardar configuración usada
-        config = session.get('config', {})
-        criterio_usado = config.get('criterio', 'tipo')
-        organizar_por_fecha = config.get('organizar_por_fecha', True)
-        organizar_por_extension = config.get('organizar_por_extension', True)
-
-        # Guardar resultado
+        # Guardar resultado (usando variables del ámbito de la función)
         estado_proceso['resultado'] = {
             'archivos_procesados': len(archivos_procesados),
             'estadisticas': estadisticas_completas,
             'estadisticas_adicionales': estadisticas_adicionales,
             'ruta_reporte': ruta_reporte,
             'ruta_destino': ruta_destino,
-            'criterio': criterio_usado,
+            'criterio': criterio,
             'organizar_por_fecha': organizar_por_fecha,
             'organizar_por_extension': organizar_por_extension,
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
