@@ -44,7 +44,7 @@
                             <canvas id="chartAños"></canvas>
                         </div>
                         {% endif %}
-                        <div class="chart-container" style="grid-column: 1 / -1;">
+                        <div class="chart-container" style="grid-column: 1 / -1; max-width: 600px; margin: 0 auto; width: 100%;">
                             <h4 style="text-align: center;">Extensiones Principales</h4>
                             <canvas id="chartExtensiones"></canvas>
                         </div>
@@ -339,7 +339,7 @@
                 maintainAspectRatio: true,
                 plugins: {
                     legend: {
-                        position: 'right',
+                        position: 'bottom',
                         labels: { color: textColor, boxWidth: 12 }
                     }
                 }

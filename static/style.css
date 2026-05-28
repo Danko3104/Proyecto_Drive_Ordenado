@@ -1325,6 +1325,7 @@ code {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-lg);
     margin-top: var(--spacing-md);
+    align-items: start;
 }
 
 @media (max-width: 768px) {
