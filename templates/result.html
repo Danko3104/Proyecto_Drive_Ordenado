@@ -193,6 +193,14 @@
 
                 <div class="section">
                     <h3 class="section-title">📁 Estructura de Carpetas Generada</h3>
+                    <p class="section-description">
+                        Criterio utilizado: <strong>{{ resultado.criterio|upper }}</strong>
+                        {% if resultado.organizar_por_fecha %} + Fecha{% endif %}
+                        {% if resultado.organizar_por_extension %} + Extensión{% endif %}
+                    </p>
+
+                    <!-- ESTRUCTURA POR TIPO -->
+                    {% if resultado.criterio == 'tipo' %}
                     <div class="folder-structure">
                         <div class="folder-item">
                             <span class="folder-icon">📁</span>
@@ -203,8 +211,93 @@
                             <span class="folder-icon">📂</span>
                             <span class="folder-name">{{ categoria.capitalize() }}</span>
                         </div>
+                        {% if resultado.organizar_por_fecha %}
+                        <div class="folder-item folder-level-2">
+                            <span class="folder-icon">📅</span>
+                            <span class="folder-name">Año (2024, 2023...)</span>
+                        </div>
+                        <div class="folder-item folder-level-3">
+                            <span class="folder-icon">📆</span>
+                            <span class="folder-name">Mes (Enero, Febrero...)</span>
+                        </div>
+                        {% endif %}
+                        {% if resultado.organizar_por_extension %}
+                        <div class="folder-item folder-level-4">
+                            <span class="folder-icon">📄</span>
+                            <span class="folder-name">Extensión (pdf, docx...)</span>
+                        </div>
+                        {% endif %}
                         {% endfor %}
                     </div>
+                    {% endif %}
+
+                    <!-- ESTRUCTURA POR FECHA -->
+                    {% if resultado.criterio == 'fecha' %}
+                    <div class="folder-structure">
+                        <div class="folder-item">
+                            <span class="folder-icon">📁</span>
+                            <span class="folder-name">{{ resultado.ruta_destino.split('/')[-1] }}</span>
+                        </div>
+                        <div class="folder-item folder-level-1">
+                            <span class="folder-icon">📅</span>
+                            <span class="folder-name">Año (2024, 2023...)</span>
+                        </div>
+                        <div class="folder-item folder-level-2">
+                            <span class="folder-icon">📆</span>
+                            <span class="folder-name">Mes (Enero, Febrero...)</span>
+                        </div>
+                        {% for categoria in resultado.estadisticas.por_categoria.keys() %}
+                        <div class="folder-item folder-level-3">
+                            <span class="folder-icon">📂</span>
+                            <span class="folder-name">{{ categoria.capitalize() }}</span>
+                        </div>
+                        {% endfor %}
+                        {% if resultado.organizar_por_extension %}
+                        <div class="folder-item folder-level-4">
+                            <span class="folder-icon">📄</span>
+                            <span class="folder-name">Extensión (pdf, docx...)</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- ESTRUCTURA POR TAMAÑO -->
+                    {% if resultado.criterio == 'tamaño' %}
+                    <div class="folder-structure">
+                        <div class="folder-item">
+                            <span class="folder-icon">📁</span>
+                            <span class="folder-name">{{ resultado.ruta_destino.split('/')[-1] }}</span>
+                        </div>
+                        <div class="folder-item folder-level-1">
+                            <span class="folder-icon">⚖️</span>
+                            <span class="folder-name">Pequeños_1MB</span>
+                        </div>
+                        <div class="folder-item folder-level-1">
+                            <span class="folder-icon">⚖️</span>
+                            <span class="folder-name">Medianos_1-10MB</span>
+                        </div>
+                        <div class="folder-item folder-level-1">
+                            <span class="folder-icon">⚖️</span>
+                            <span class="folder-name">Grandes_10-100MB</span>
+                        </div>
+                        <div class="folder-item folder-level-1">
+                            <span class="folder-icon">⚖️</span>
+                            <span class="folder-name">Muy_Grandes_100MB+</span>
+                        </div>
+                        {% for categoria in resultado.estadisticas.por_categoria.keys() %}
+                        <div class="folder-item folder-level-2">
+                            <span class="folder-icon">📂</span>
+                            <span class="folder-name">{{ categoria.capitalize() }}</span>
+                        </div>
+                        {% endfor %}
+                        {% if resultado.organizar_por_extension %}
+                        <div class="folder-item folder-level-3">
+                            <span class="folder-icon">📄</span>
+                            <span class="folder-name">Extensión (pdf, docx...)</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="card-footer">

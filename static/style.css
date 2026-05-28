@@ -711,6 +711,18 @@ select:focus {
     padding: var(--spacing);
     font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
     font-size: 0.9rem;
+    border: 1px solid var(--color-border);
+}
+
+.section-description {
+    font-size: 0.9rem;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-sm);
+    display: inline-block;
 }
 
 .folder-item {
@@ -722,6 +734,18 @@ select:focus {
 
 .folder-level-1 {
     padding-left: var(--spacing-lg);
+}
+
+.folder-level-2 {
+    padding-left: calc(var(--spacing-lg) * 2);
+}
+
+.folder-level-3 {
+    padding-left: calc(var(--spacing-lg) * 3);
+}
+
+.folder-level-4 {
+    padding-left: calc(var(--spacing-lg) * 4);
 }
 
 .folder-icon {
