@@ -41,14 +41,10 @@
                             <h4>Archivos por Año</h4>
                             <canvas id="chartAños"></canvas>
                         </div>
-                        <div class="chart-container">
-                            <h4>Top Extensiones</h4>
-                            <canvas id="chartExtensiones"></canvas>
-                        </div>
-                        <div class="chart-container">
-                            <h4>Distribución de Tamaños</h4>
-                            <canvas id="chartTamaños"></canvas>
-                        </div>
+                    </div>
+                    <div class="chart-container" style="max-width: 500px; margin: var(--spacing-lg) auto 0;">
+                        <h4 style="text-align: center;">Extensiones Principales</h4>
+                        <canvas id="chartExtensiones"></canvas>
                     </div>
                 </div>
 
@@ -131,32 +127,38 @@
                     </div>
                 </div>
 
+                <!-- RESUMEN ESTADÍSTICO (DESPLEGABLE) -->
                 <div class="report-section">
-                    <h3 class="section-title">Resumen Estadístico</h3>
-                    <div class="stats-summary">
-                        <div class="summary-item">
-                            <span class="summary-label">Total de archivos:</span>
-                            <span class="summary-value">{{ estadisticas.resumen.total_archivos }}</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Tamaño total:</span>
-                            <span class="summary-value">{{ estadisticas.resumen.tamaño_total_mb }} MB</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Categorías:</span>
-                            <span class="summary-value">{{ estadisticas.resumen.total_categorias }}</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Extensiones diferentes:</span>
-                            <span class="summary-value">{{ estadisticas.resumen.total_extensiones }}</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Tamaño promedio:</span>
-                            <span class="summary-value">{{ estadisticas.tamaño_stats.promedio_mb }} MB</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Archivo más grande:</span>
-                            <span class="summary-value">{{ estadisticas.tamaño_stats.maximo_mb }} MB</span>
+                    <div class="expandable-header" onclick="toggleDuplicados('resumenSection', 'resumenIcon')">
+                        <h3 class="section-title" style="margin: 0;">📈 Resumen Estadístico</h3>
+                        <span class="expandable-icon" id="resumenIcon">▼</span>
+                    </div>
+                    <div id="resumenSection" style="display: none; margin-top: var(--spacing);">
+                        <div class="stats-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Total de archivos:</span>
+                                <span class="summary-value">{{ estadisticas.resumen.total_archivos }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Tamaño total:</span>
+                                <span class="summary-value">{{ estadisticas.resumen.tamaño_total_mb }} MB</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Categorías:</span>
+                                <span class="summary-value">{{ estadisticas.resumen.total_categorias }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Extensiones diferentes:</span>
+                                <span class="summary-value">{{ estadisticas.resumen.total_extensiones }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Tamaño promedio:</span>
+                                <span class="summary-value">{{ estadisticas.tamaño_stats.promedio_mb }} MB</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Archivo más grande:</span>
+                                <span class="summary-value">{{ estadisticas.tamaño_stats.maximo_mb }} MB</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -346,43 +348,6 @@
         });
         {% endif %}
 
-        // Gráfica de Tamaños
-        {% if estadisticas.tamaño_stats %}
-        new Chart(document.getElementById('chartTamaños'), {
-            type: 'bar',
-            data: {
-                labels: ['Promedio', 'Mínimo', 'Máximo'],
-                datasets: [{
-                    label: 'MB',
-                    data: [
-                        {{ estadisticas.tamaño_stats.promedio_mb }},
-                        {{ estadisticas.tamaño_stats.minimo_mb }},
-                        {{ estadisticas.tamaño_stats.maximo_mb }}
-                    ],
-                    backgroundColor: chartColors.tamaños,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: textColor },
-                        grid: { color: gridColor }
-                    },
-                    x: {
-                        ticks: { color: textColor },
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-        {% endif %}
         {% endif %}
 
         function actualizarColoresGraficas() {
