@@ -56,6 +56,14 @@
                         <div class="stat-label">MB totales</div>
                     </div>
 
+                    {% if resultado.estadisticas.carpetas_eliminadas.total > 0 %}
+                    <div class="stat-card stat-info expandable-card" onclick="toggleSection('carpetasSection', 'carpIcon')">
+                        <div class="stat-icon">🗑️</div>
+                        <div class="stat-value" id="statCarpetas">{{ resultado.estadisticas.carpetas_eliminadas.total }}</div>
+                        <div class="stat-label">Carpetas elim. ▼</div>
+                    </div>
+                    {% endif %}
+
                     {% if resultado.estadisticas.duplicados.cantidad > 0 %}
                     <div class="stat-card stat-warning expandable-card" onclick="toggleSection('duplicadosSection', 'dupIcon')">
                         <div class="stat-icon">🔍</div>
@@ -123,6 +131,38 @@
                         <p class="duplicate-note">
                             Los archivos duplicados han sido marcados en el reporte CSV pero no han sido eliminados.
                             <a href="/reporte" style="color: var(--color-primary);">Ver detalles completos →</a>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- CARPETAS ELIMINADAS DESPLEGABLE -->
+                {% if resultado.estadisticas.carpetas_eliminadas.total > 0 %}
+                <div id="carpetasSection" style="display: none;">
+                    <div class="section section-info" style="margin-top: 0;">
+                        <h3 class="section-title" onclick="toggleSection('carpetasSection', 'carpIcon')" style="cursor: pointer;">
+                            🗑️ Carpetas Vacías Eliminadas <span id="carpIcon">▲</span>
+                        </h3>
+                        <div class="duplicate-summary">
+                            <div class="duplicate-stat">
+                                <span class="duplicate-value">{{ resultado.estadisticas.carpetas_eliminadas.total }}</span>
+                                <span class="duplicate-label">carpetas eliminadas</span>
+                            </div>
+                            {% if resultado.estadisticas.carpetas_eliminadas.origen > 0 %}
+                            <div class="duplicate-stat">
+                                <span class="duplicate-value">{{ resultado.estadisticas.carpetas_eliminadas.origen }}</span>
+                                <span class="duplicate-label">en ruta origen</span>
+                            </div>
+                            {% endif %}
+                            {% if resultado.estadisticas.carpetas_eliminadas.destino > 0 %}
+                            <div class="duplicate-stat">
+                                <span class="duplicate-value">{{ resultado.estadisticas.carpetas_eliminadas.destino }}</span>
+                                <span class="duplicate-label">en ruta destino</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <p class="duplicate-note">
+                            Se eliminaron las carpetas que quedaron vacías después de mover los archivos.
                         </p>
                     </div>
                 </div>

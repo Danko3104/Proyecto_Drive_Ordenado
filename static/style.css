@@ -1020,8 +1020,9 @@ code {
 }
 
 .preview-stat-label {
-    font-size: 0.9rem;
-    color: var(--color-text-light);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text);
 }
 
 /* Sección de duplicados - centrada */
@@ -1083,8 +1084,8 @@ code {
 }
 
 .preview-section-title {
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 500;
     margin-bottom: var(--spacing-sm);
     color: var(--color-text);
     text-align: center;
