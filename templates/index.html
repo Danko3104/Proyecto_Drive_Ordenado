@@ -34,6 +34,18 @@
                                placeholder="/content/drive/MyDrive/MiCarpeta"
                                required>
                         <span class="help-text">Ejemplo: /content/drive/MyDrive/Descargas</span>
+
+                        <div id="securityWarning" class="security-warning hidden">
+                            <span class="security-icon">🚨</span>
+                            <div class="security-content">
+                                <strong>¡Advertencia de seguridad!</strong>
+                                <p>Esta ruta parece ser todo tu Google Drive o una ubicación sensible. Esto moverá <strong>TODOS</strong> tus archivos.</p>
+                                <ul>
+                                    <li>✅ Use una subcarpeta específica como: <code>/content/drive/MyDrive/Descargas</code></li>
+                                    <li>❌ Evite rutas como: <code>/content/drive/MyDrive/</code> sola</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">

@@ -257,12 +257,15 @@ async function iniciarOrganizacion() {
 
 /**
  * Valida que la ruta ingresada tenga formato correcto
+ * y detecta rutas peligrosas (todo el Drive)
  */
 function validarRuta() {
     const input = document.getElementById('ruta_origen');
     const ruta = input.value.trim();
+    const securityWarning = document.getElementById('securityWarning');
 
     if (!ruta) {
+        if (securityWarning) securityWarning.classList.add('hidden');
         return;
     }
 
@@ -274,9 +277,54 @@ function validarRuta() {
     // Verificar que parezca una ruta válida
     if (!ruta.startsWith('/') && !ruta.startsWith('~')) {
         mostrarAdvertencia(input, 'La ruta debe comenzar con / o ~');
+        if (securityWarning) securityWarning.classList.add('hidden');
     } else {
         limpiarAdvertencia(input);
     }
+
+    // Detectar rutas peligrosas (todo el Drive o carpetas raíz sensibles)
+    if (esRutaPeligrosa(ruta)) {
+        if (securityWarning) {
+            securityWarning.classList.remove('hidden');
+        }
+    } else {
+        if (securityWarning) {
+            securityWarning.classList.add('hidden');
+        }
+    }
+}
+
+/**
+ * Detecta si una ruta es peligrosa (todo el Drive o carpetas sensibles)
+ */
+function esRutaPeligrosa(ruta) {
+    // Normalizar la ruta (quitar trailing slash)
+    const rutaNormalizada = ruta.replace(/\/$/, '');
+
+    // Patrones de rutas peligrosas
+    const patronesPeligrosos = [
+        /^\/content\/drive\/?$/i,                           // /content/drive
+        /^\/content\/drive\/MyDrive\/?$/i,                  // /content/drive/MyDrive
+        /^\/content\/drive\/Shareddrives\/?$/i,             // /content/drive/Shareddrives
+        /^\/content\/drive\/.*\/(Google\s*Drive|Mi\s*unidad)\/?$/i,  // Carpetas raíz con otros nombres
+        /^~\/drive\/?$/i,                                   // ~/drive
+        /^~\/GoogleDrive\/?$/i,                             // ~/GoogleDrive
+    ];
+
+    // Verificar si coincide con algún patrón peligroso
+    for (const patron of patronesPeligrosos) {
+        if (patron.test(rutaNormalizada)) {
+            return true;
+        }
+    }
+
+    // Detectar rutas que parecen ser la raíz del Drive sin subcarpeta específica
+    // Ejemplo: /content/drive/MyDrive/ (termina en MyDrive/)
+    if (rutaNormalizada.match(/\/content\/drive\/[^\/]+\/?$/i)) {
+        return true;
+    }
+
+    return false;
 }
 
 /**
