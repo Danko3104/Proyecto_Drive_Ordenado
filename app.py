@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, Any
 
 # Importar módulos del proyecto
-from organizer import organizar_archivos, obtener_estadisticas_adicionales
+from organizer import organizar_archivos, obtener_estadisticas_adicionales, obtener_preview_organizacion
 from duplicates import detectar_duplicados_en_carpeta, calcular_hash_archivos, encontrar_duplicados
 from reporter import (
     generar_reporte_csv, calcular_estadisticas_pandas,
@@ -39,6 +39,54 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/preview', methods=['POST'])
+def preview():
+    """Endpoint para obtener un preview de la organización sin mover archivos."""
+    # Obtener datos del formulario
+    data = request.get_json()
+
+    ruta_origen = data.get('ruta_origen', '').strip()
+    detectar_duplicados = data.get('detectar_duplicados', False)
+
+    # Validaciones
+    if not ruta_origen:
+        return jsonify({
+            'success': False,
+            'error': 'Debe especificar una ruta de origen'
+        }), 400
+
+    # Expandir ~ a la ruta home
+    ruta_origen = os.path.expanduser(ruta_origen)
+
+    # Verificar que la ruta existe
+    if not os.path.exists(ruta_origen):
+        return jsonify({
+            'success': False,
+            'error': f'La ruta no existe: {ruta_origen}'
+        }), 400
+
+    if not os.path.isdir(ruta_origen):
+        return jsonify({
+            'success': False,
+            'error': f'La ruta no es un directorio: {ruta_origen}'
+        }), 400
+
+    try:
+        # Obtener preview de la organización
+        preview_data = obtener_preview_organizacion(ruta_origen, detectar_duplicados)
+
+        return jsonify({
+            'success': True,
+            'preview': preview_data
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/organizar', methods=['POST'])
 def organizar():
     """Endpoint para iniciar el proceso de organización."""
@@ -58,7 +106,9 @@ def organizar():
     ruta_destino = data.get('ruta_destino', '').strip() or ruta_origen
     criterio = data.get('criterio', 'tipo')
     organizar_por_fecha = data.get('organizar_por_fecha', True)
+    organizar_por_extension = data.get('organizar_por_extension', True)
     detectar_duplicados = data.get('detectar_duplicados', False)
+    confirmado = data.get('confirmado', False)
 
     # Validaciones
     if not ruta_origen:
@@ -90,6 +140,7 @@ def organizar():
         'ruta_destino': ruta_destino,
         'criterio': criterio,
         'organizar_por_fecha': organizar_por_fecha,
+        'organizar_por_extension': organizar_por_extension,
         'detectar_duplicados': detectar_duplicados
     }
 
@@ -104,7 +155,7 @@ def organizar():
 
     thread = threading.Thread(
         target=ejecutar_organizacion,
-        args=(ruta_origen, ruta_destino, criterio, organizar_por_fecha, detectar_duplicados)
+        args=(ruta_origen, ruta_destino, criterio, organizar_por_fecha, organizar_por_extension, detectar_duplicados)
     )
     thread.daemon = True
     thread.start()
@@ -114,7 +165,7 @@ def organizar():
 
 def ejecutar_organizacion(ruta_origen: str, ruta_destino: str,
                          criterio: str, organizar_por_fecha: bool,
-                         detectar_duplicados: bool):
+                         organizar_por_extension: bool, detectar_duplicados: bool):
     """
     Función que ejecuta la organización en un hilo separado.
 
@@ -123,6 +174,7 @@ def ejecutar_organizacion(ruta_origen: str, ruta_destino: str,
         ruta_destino: Ruta de la carpeta destino
         criterio: Criterio de organización
         organizar_por_fecha: Si organizar por fecha
+        organizar_por_extension: Si organizar por extensión
         detectar_duplicados: Si detectar duplicados
     """
     global estado_proceso
@@ -150,7 +202,8 @@ def ejecutar_organizacion(ruta_origen: str, ruta_destino: str,
             ruta_origen=ruta_origen,
             ruta_destino=ruta_destino,
             criterio=criterio,
-            organizar_por_fecha=organizar_por_fecha
+            organizar_por_fecha=organizar_por_fecha,
+            organizar_por_extension=organizar_por_extension
         )
 
         # Si hay información de duplicados, combinarla

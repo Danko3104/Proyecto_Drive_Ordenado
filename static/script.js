@@ -6,6 +6,8 @@
 // Estado global
 let intervaloEstado = null;
 let procesoIniciado = false;
+let previewData = null;
+let formDataGuardado = null;
 
 // Elementos del DOM
 document.addEventListener('DOMContentLoaded', function() {
@@ -30,17 +32,227 @@ function inicializarEventos() {
 }
 
 /**
- * Maneja el envío del formulario
+ * Maneja el envío del formulario - ahora obtiene preview primero
  */
 function manejarSubmit(e) {
     e.preventDefault();
 
-    // Confirmación antes de iniciar
-    if (!confirm('¿Estás seguro de que deseas organizar los archivos?\n\nEsta acción moverá los archivos a nuevas ubicaciones.')) {
+    if (procesoIniciado) {
         return;
     }
 
+    // Obtener datos del formulario
+    formDataGuardado = {
+        ruta_origen: document.getElementById('ruta_origen').value.trim(),
+        ruta_destino: document.getElementById('ruta_destino').value.trim(),
+        criterio: document.getElementById('criterio').value,
+        organizar_por_fecha: document.getElementById('organizar_por_fecha').checked,
+        organizar_por_extension: document.getElementById('organizar_por_extension').checked,
+        detectar_duplicados: document.getElementById('detectar_duplicados').checked
+    };
+
+    // Validar ruta
+    if (!formDataGuardado.ruta_origen) {
+        alert('Debe especificar una ruta de origen');
+        return;
+    }
+
+    // Mostrar sección de progreso mientras se carga el preview
+    mostrarSeccion('progressSection');
+    ocultarSeccion('resultSection');
+    ocultarSeccion('errorSection');
+    ocultarSeccion('previewSection');
+
+    const mensaje = document.getElementById('progressMessage');
+    if (mensaje) {
+        mensaje.textContent = 'Analizando archivos...';
+    }
+
+    // Obtener preview
+    obtenerPreview();
+}
+
+/**
+ * Obtiene el preview de la organización desde el servidor
+ */
+async function obtenerPreview() {
+    try {
+        const respuesta = await fetch('/preview', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ruta_origen: formDataGuardado.ruta_origen,
+                detectar_duplicados: formDataGuardado.detectar_duplicados
+            })
+        });
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+            throw new Error(datos.error || 'Error al obtener preview');
+        }
+
+        previewData = datos.preview;
+
+        // Ocultar progreso y mostrar preview
+        ocultarSeccion('progressSection');
+        mostrarPreview(datos.preview);
+
+    } catch (error) {
+        mostrarError(error.message);
+    }
+}
+
+/**
+ * Muestra el preview en la interfaz
+ */
+function mostrarPreview(preview) {
+    // Actualizar estadísticas principales
+    const totalEl = document.getElementById('previewTotal');
+    const sizeEl = document.getElementById('previewSize');
+    const dupStatEl = document.getElementById('previewDupStat');
+    const dupCountEl = document.getElementById('previewDupCount');
+
+    if (totalEl) totalEl.textContent = preview.total_archivos;
+    if (sizeEl) sizeEl.textContent = preview.tamaño_total_mb + ' MB';
+
+    // Mostrar duplicados si hay
+    if (preview.duplicados && preview.duplicados.cantidad > 0) {
+        if (dupStatEl) dupStatEl.style.display = 'flex';
+        if (dupCountEl) dupCountEl.textContent = preview.duplicados.cantidad;
+    } else {
+        if (dupStatEl) dupStatEl.style.display = 'none';
+    }
+
+    // Generar lista de categorías
+    const categoriesContainer = document.getElementById('previewCategories');
+    if (categoriesContainer) {
+        categoriesContainer.innerHTML = '';
+
+        const categorias = preview.categorias || {};
+
+        for (const [categoria, datos] of Object.entries(categorias)) {
+            const catCard = document.createElement('div');
+            catCard.className = 'preview-category-card';
+
+            const icono = obtenerIconoCategoria(categoria);
+            const tamañoMB = (datos.tamaño_bytes / (1024 * 1024)).toFixed(2);
+
+            catCard.innerHTML = `
+                <div class="preview-category-header">
+                    <span class="preview-category-icon">${icono}</span>
+                    <span class="preview-category-name">${capitalizar(categoria)}</span>
+                </div>
+                <div class="preview-category-stats">
+                    <span class="preview-category-count">${datos.cantidad} archivos</span>
+                    <span class="preview-category-size">${tamañoMB} MB</span>
+                </div>
+            `;
+
+            categoriesContainer.appendChild(catCard);
+        }
+    }
+
+    // Mostrar sección de preview
+    mostrarSeccion('previewSection');
+}
+
+/**
+ * Obtiene el icono correspondiente a una categoría
+ */
+function obtenerIconoCategoria(categoria) {
+    const iconos = {
+        'documentos': '📄',
+        'imagenes': '🖼️',
+        'multimedia': '🎬',
+        'otros': '📦'
+    };
+    return iconos[categoria.toLowerCase()] || '📁';
+}
+
+/**
+ * Capitaliza la primera letra de un string
+ */
+function capitalizar(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * Cancela el preview y vuelve al formulario
+ */
+function cancelarPreview() {
+    ocultarSeccion('previewSection');
+    previewData = null;
+    formDataGuardado = null;
+}
+
+/**
+ * Confirma la organización y la ejecuta
+ */
+function confirmarOrganizacion() {
+    // Ocultar preview
+    ocultarSeccion('previewSection');
+
+    // Mostrar progreso
+    mostrarSeccion('progressSection');
+
+    // Iniciar organización
     iniciarOrganizacion();
+}
+
+/**
+ * Inicia el proceso de organización
+ */
+async function iniciarOrganizacion() {
+    if (procesoIniciado) {
+        return;
+    }
+
+    procesoIniciado = true;
+
+    // Deshabilitar botón
+    const btn = document.getElementById('btnOrganizar');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+    }
+
+    try {
+        // Agregar flag de confirmado
+        const dataToSend = {
+            ...formDataGuardado,
+            confirmado: true
+        };
+
+        // Enviar petición al servidor
+        const respuesta = await fetch('/organizar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend)
+        });
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+            throw new Error(datos.error || 'Error al iniciar el proceso');
+        }
+
+        // Iniciar polling del estado
+        iniciarPollingEstado();
+
+    } catch (error) {
+        mostrarError(error.message);
+        procesoIniciado = false;
+
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="btn-icon">🚀</span> Organizar Archivos';
+        }
+    }
 }
 
 /**
@@ -88,67 +300,6 @@ function limpiarAdvertencia(elemento) {
     const grupo = elemento.parentNode;
     const advertencias = grupo.querySelectorAll('.error-text');
     advertencias.forEach(adv => adv.remove());
-}
-
-/**
- * Inicia el proceso de organización
- */
-async function iniciarOrganizacion() {
-    if (procesoIniciado) {
-        return;
-    }
-
-    procesoIniciado = true;
-
-    // Obtener datos del formulario
-    const formData = {
-        ruta_origen: document.getElementById('ruta_origen').value.trim(),
-        ruta_destino: document.getElementById('ruta_destino').value.trim(),
-        criterio: document.getElementById('criterio').value,
-        organizar_por_fecha: document.getElementById('organizar_por_fecha').checked,
-        detectar_duplicados: document.getElementById('detectar_duplicados').checked
-    };
-
-    // Mostrar sección de progreso
-    mostrarSeccion('progressSection');
-    ocultarSeccion('resultSection');
-    ocultarSeccion('errorSection');
-
-    // Deshabilitar botón
-    const btn = document.getElementById('btnOrganizar');
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Procesando...';
-    }
-
-    try {
-        // Enviar petición al servidor
-        const respuesta = await fetch('/organizar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const datos = await respuesta.json();
-
-        if (!respuesta.ok) {
-            throw new Error(datos.error || 'Error al iniciar el proceso');
-        }
-
-        // Iniciar polling del estado
-        iniciarPollingEstado();
-
-    } catch (error) {
-        mostrarError(error.message);
-        procesoIniciado = false;
-
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<span class="btn-icon">🚀</span> Organizar Archivos';
-        }
-    }
 }
 
 /**
@@ -238,6 +389,7 @@ function mostrarResultado() {
  */
 function mostrarError(mensaje) {
     ocultarSeccion('progressSection');
+    ocultarSeccion('previewSection');
     mostrarSeccion('errorSection');
 
     const errorMsg = document.getElementById('errorMessage');
@@ -259,6 +411,10 @@ function resetForm() {
     ocultarSeccion('errorSection');
     ocultarSeccion('resultSection');
     ocultarSeccion('progressSection');
+    ocultarSeccion('previewSection');
+
+    previewData = null;
+    formDataGuardado = null;
 
     const btn = document.getElementById('btnOrganizar');
     if (btn) {
@@ -319,3 +475,5 @@ function formatearFecha(fechaStr) {
 window.resetForm = resetForm;
 window.formatearBytes = formatearBytes;
 window.formatearFecha = formatearFecha;
+window.cancelarPreview = cancelarPreview;
+window.confirmarOrganizacion = confirmarOrganizacion;

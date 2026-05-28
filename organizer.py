@@ -98,27 +98,43 @@ def escanear_archivos(ruta_origen: str) -> List[Dict]:
 
 
 def generar_ruta_destino(archivo_info: Dict, ruta_base_destino: str,
-                         organizar_por_fecha: bool = True) -> str:
+                         organizar_por_fecha: bool = True,
+                         organizar_por_extension: bool = True) -> str:
     """
-    Genera la ruta de destino para un archivo según su categoría y fecha.
+    Genera la ruta de destino para un archivo según su categoría, fecha y extensión.
 
     Args:
         archivo_info: Diccionario con metadatos del archivo
         ruta_base_destino: Ruta base donde se creará la estructura
         organizar_por_fecha: Si True, organiza en subcarpetas por año/mes
+        organizar_por_extension: Si True, organiza en subcarpetas por extensión
 
     Returns:
         Ruta completa de destino para el archivo
     """
     categoria = archivo_info['categoria'].capitalize()
 
+    # Obtener extensión sin el punto, en minúsculas
+    extension = archivo_info['extension'].lower().lstrip('.')
+    if not extension:
+        extension = 'sin_extension'
+
     if organizar_por_fecha:
         fecha = archivo_info['fecha_modificacion']
         año = str(fecha.year)
         mes = MESES_ES[fecha.month]
-        ruta_destino = os.path.join(ruta_base_destino, categoria, año, mes)
+
+        if organizar_por_extension:
+            # Estructura: Categoría/Año/Mes/extensión/archivo
+            ruta_destino = os.path.join(ruta_base_destino, categoria, año, mes, extension)
+        else:
+            ruta_destino = os.path.join(ruta_base_destino, categoria, año, mes)
     else:
-        ruta_destino = os.path.join(ruta_base_destino, categoria)
+        if organizar_por_extension:
+            # Estructura: Categoría/extensión/archivo
+            ruta_destino = os.path.join(ruta_base_destino, categoria, extension)
+        else:
+            ruta_destino = os.path.join(ruta_base_destino, categoria)
 
     return ruta_destino
 
@@ -197,7 +213,8 @@ def mover_archivo(archivo_info: Dict, ruta_destino: str, nuevo_nombre: str) -> D
 
 
 def organizar_archivos(ruta_origen: str, ruta_destino: str = None,
-                       criterio: str = 'tipo', organizar_por_fecha: bool = True) -> Tuple[List[Dict], Dict]:
+                       criterio: str = 'tipo', organizar_por_fecha: bool = True,
+                       organizar_por_extension: bool = True) -> Tuple[List[Dict], Dict]:
     """
     Función principal que organiza archivos según las configuraciones especificadas.
 
@@ -207,6 +224,7 @@ def organizar_archivos(ruta_origen: str, ruta_destino: str = None,
                       Si es None, se usa la misma ruta_origen
         criterio: Criterio principal ('tipo', 'fecha', 'tamaño')
         organizar_por_fecha: Si True, organiza en subcarpetas por año/mes
+        organizar_por_extension: Si True, organiza en subcarpetas por extensión
 
     Returns:
         Tupla con (lista de archivos procesados, estadísticas)
@@ -239,13 +257,18 @@ def organizar_archivos(ruta_origen: str, ruta_destino: str = None,
     for archivo in archivos:
         # Generar ruta de destino
         if criterio == 'tipo':
-            ruta_cat_destino = generar_ruta_destino(archivo, ruta_destino, organizar_por_fecha)
+            ruta_cat_destino = generar_ruta_destino(archivo, ruta_destino, organizar_por_fecha, organizar_por_extension)
         elif criterio == 'fecha':
             # Priorizar fecha sobre tipo
             fecha = archivo['fecha_modificacion']
             año = str(fecha.year)
             mes = MESES_ES[fecha.month]
-            ruta_cat_destino = os.path.join(ruta_destino, año, mes, archivo['categoria'].capitalize())
+
+            if organizar_por_extension:
+                extension = archivo['extension'].lower().lstrip('.') or 'sin_extension'
+                ruta_cat_destino = os.path.join(ruta_destino, año, mes, archivo['categoria'].capitalize(), extension)
+            else:
+                ruta_cat_destino = os.path.join(ruta_destino, año, mes, archivo['categoria'].capitalize())
         elif criterio == 'tamaño':
             # Clasificar por tamaño
             tamaño_mb = archivo['tamaño_bytes'] / (1024 * 1024)
@@ -257,7 +280,12 @@ def organizar_archivos(ruta_origen: str, ruta_destino: str = None,
                 categoria_tamaño = 'Grandes_10-100MB'
             else:
                 categoria_tamaño = 'Muy_Grandes_100MB+'
-            ruta_cat_destino = os.path.join(ruta_destino, categoria_tamaño, archivo['categoria'].capitalize())
+
+            if organizar_por_extension:
+                extension = archivo['extension'].lower().lstrip('.') or 'sin_extension'
+                ruta_cat_destino = os.path.join(ruta_destino, categoria_tamaño, archivo['categoria'].capitalize(), extension)
+            else:
+                ruta_cat_destino = os.path.join(ruta_destino, categoria_tamaño, archivo['categoria'].capitalize())
 
         # Obtener nombre único
         nuevo_nombre = obtener_nombre_unico(ruta_cat_destino, archivo['nombre_original'])
@@ -278,6 +306,77 @@ def organizar_archivos(ruta_origen: str, ruta_destino: str = None,
             estadisticas['errores'] += 1
 
     return archivos_procesados, estadisticas
+
+
+def obtener_preview_organizacion(ruta_origen: str, detectar_duplicados: bool = False) -> Dict:
+    """
+    Obtiene un preview de la organización sin mover archivos.
+
+    Args:
+        ruta_origen: Ruta de la carpeta a organizar
+        detectar_duplicados: Si detectar archivos duplicados
+
+    Returns:
+        Diccionario con estadísticas del preview
+    """
+    from duplicates import calcular_hash_archivos, encontrar_duplicados
+
+    # Escanear archivos
+    archivos = escanear_archivos(ruta_origen)
+
+    if not archivos:
+        return {
+            'total_archivos': 0,
+            'categorias': {},
+            'por_extension': {},
+            'duplicados': {'cantidad': 0, 'espacio_mb': 0},
+            'tamaño_total_mb': 0,
+            'ruta_origen': ruta_origen
+        }
+
+    # Calcular estadísticas básicas
+    categorias = {}
+    por_extension = {}
+    tamaño_total = 0
+
+    for archivo in archivos:
+        # Por categoría
+        cat = archivo['categoria']
+        if cat not in categorias:
+            categorias[cat] = {'cantidad': 0, 'tamaño_bytes': 0}
+        categorias[cat]['cantidad'] += 1
+        categorias[cat]['tamaño_bytes'] += archivo['tamaño_bytes']
+
+        # Por extensión
+        ext = archivo['extension'].lower() or 'sin_extension'
+        if ext not in por_extension:
+            por_extension[ext] = {'cantidad': 0, 'tamaño_bytes': 0}
+        por_extension[ext]['cantidad'] += 1
+        por_extension[ext]['tamaño_bytes'] += archivo['tamaño_bytes']
+
+        tamaño_total += archivo['tamaño_bytes']
+
+    # Detectar duplicados si se solicita
+    duplicados_info = {'cantidad': 0, 'espacio_mb': 0}
+
+    if detectar_duplicados:
+        archivos_con_hash = calcular_hash_archivos(archivos)
+        archivos_marcados, stats_duplicados = encontrar_duplicados(archivos_con_hash)
+
+        duplicados_info = {
+            'cantidad': stats_duplicados.get('total_archivos_duplicados', 0),
+            'espacio_mb': stats_duplicados.get('espacio_duplicado_mb', 0),
+            'grupos': stats_duplicados.get('total_grupos_duplicados', 0)
+        }
+
+    return {
+        'total_archivos': len(archivos),
+        'categorias': categorias,
+        'por_extension': por_extension,
+        'duplicados': duplicados_info,
+        'tamaño_total_mb': round(tamaño_total / (1024 * 1024), 2),
+        'ruta_origen': ruta_origen
+    }
 
 
 def obtener_estadisticas_adicionales(archivos_procesados: List[Dict]) -> Dict:

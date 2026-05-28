@@ -19,7 +19,9 @@ Aplicación web que automatiza la organización de archivos en Google Drive mont
 
 - **Escaneo recursivo** de archivos en cualquier carpeta
 - **Clasificación automática** por tipo (documentos, imágenes, multimedia, otros)
-- **Organización jerárquica** por fecha (año/mes)
+- **Organización jerárquica** por fecha (año/mes) y extensión
+- **Subcarpetas por extensión** dentro de cada mes (ej: `Documentos/2024/Marzo/pdf/`)
+- **Preview antes de organizar** con resumen de archivos y estadísticas
 - **Detección de duplicados** mediante hash MD5
 - **Generación de reportes CSV** con estadísticas detalladas
 - **Interfaz web moderna** y responsive
@@ -101,14 +103,20 @@ En la interfaz web encontrarás:
 - **Carpeta destino**: Opcional, dejar en blanco para organizar en la misma ubicación
 - **Criterio principal**: Elegir entre organizar por tipo, fecha o tamaño
 - **Organizar por fecha**: Checkbox para crear subcarpetas por año/mes
+- **Organizar por extensión**: Checkbox para crear subcarpetas por extensión dentro de cada mes
 - **Detectar duplicados**: Checkbox para identificar archivos duplicados (más lento)
 
 ### 2. Iniciar Organización
 
 1. Completa los campos del formulario
 2. Haz clic en "Organizar Archivos"
-3. Confirma la acción en el diálogo
-4. Espera a que el proceso termine (verás una barra de progreso)
+3. Revisa la **vista previa** que muestra:
+   - Total de archivos encontrados
+   - Cantidad por categoría
+   - Número de duplicados detectados
+   - Espacio total a mover
+4. Confirma la organización haciendo clic en "Confirmar y Organizar"
+5. Espera a que el proceso termine (verás una barra de progreso)
 
 ### 3. Ver Resultados
 
@@ -121,35 +129,47 @@ Una vez completado, podrás:
 
 ## 📁 Estructura de Carpetas Generada
 
-Al organizar por **tipo** y **fecha**, la estructura resultante será:
+Al organizar por **tipo**, **fecha** y **extensión**, la estructura resultante será:
 
 ```
 Carpeta_Organizada/
 ├── Documentos/
 │   ├── 2024/
 │   │   ├── Enero/
-│   │   │   └── archivo.pdf
+│   │   │   └── pdf/
+│   │   │       └── archivo.pdf
 │   │   ├── Febrero/
 │   │   └── Marzo/
-│   │       └── documento.docx
+│   │       ├── docx/
+│   │       │   └── documento.docx
+│   │       └── pdf/
+│   │           └── otro.pdf
 │   └── 2023/
 │       ├── Diciembre/
 │       └── Noviembre/
 ├── Imágenes/
 │   ├── 2024/
 │   │   └── Marzo/
-│   │       └── foto.jpg
+│   │       ├── jpg/
+│   │       │   └── foto.jpg
+│   │       └── png/
+│   │           └── imagen.png
 │   └── 2023/
 │       └── Diciembre/
-│           └── imagen.png
+│           └── jpg/
+│               └── otra_foto.jpg
 ├── Multimedia/
 │   └── 2024/
 │       └── Febrero/
-│           └── video.mp4
+│           └── mp4/
+│               └── video.mp4
 └── Otros/
     └── 2024/
-        └── archivo.xyz
+        └── zip/
+            └── archivo.zip
 ```
+
+> **Nota:** Las subcarpetas de extensión solo se crean cuando hay archivos con esa extensión. Si no deseas organizar por extensión, desmarca la opción "Organizar por extensión".
 
 ---
 
@@ -229,6 +249,7 @@ proyecto_drive_ordenado/
 | Endpoint | Método | Descripción |
 |----------|--------|-------------|
 | `/` | GET | Página principal con formulario |
+| `/preview` | POST | Obtiene preview de organización sin mover archivos |
 | `/organizar` | POST | Inicia el proceso de organización |
 | `/estado` | GET | Consulta el estado del proceso en curso |
 | `/resultados` | GET | Muestra los resultados del último proceso |

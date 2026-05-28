@@ -79,6 +79,20 @@
                     <div class="form-group checkbox-group">
                         <label class="checkbox-label">
                             <input type="checkbox"
+                                   id="organizar_por_extension"
+                                   name="organizar_por_extension"
+                                   checked>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">
+                                <strong>Organizar por extensión</strong>
+                                <span class="checkbox-description">Crear subcarpetas por tipo de archivo dentro de cada mes</span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox"
                                    id="detectar_duplicados"
                                    name="detectar_duplicados">
                             <span class="checkmark"></span>
@@ -109,6 +123,47 @@
                         </button>
                     </div>
                 </form>
+
+                <div id="previewSection" class="preview-section hidden">
+                    <div class="preview-header">
+                        <h3>📋 Vista Previa de la Organización</h3>
+                        <p class="preview-subtitle">Revise los detalles antes de confirmar</p>
+                    </div>
+
+                    <div class="preview-stats">
+                        <div class="preview-stat">
+                            <span class="preview-stat-value" id="previewTotal">0</span>
+                            <span class="preview-stat-label">Archivos totales</span>
+                        </div>
+                        <div class="preview-stat">
+                            <span class="preview-stat-value" id="previewSize">0 MB</span>
+                            <span class="preview-stat-label">Tamaño total</span>
+                        </div>
+                        <div class="preview-stat" id="previewDupStat" style="display: none;">
+                            <span class="preview-stat-value" id="previewDupCount">0</span>
+                            <span class="preview-stat-label">Duplicados</span>
+                        </div>
+                    </div>
+
+                    <div class="preview-categories" id="previewCategories">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+
+                    <div class="preview-warning">
+                        <span class="warning-icon">⚠️</span>
+                        <p>Esta acción moverá los archivos a nuevas ubicaciones. Asegúrese de tener una copia de seguridad si es necesario.</p>
+                    </div>
+
+                    <div class="preview-actions">
+                        <button type="button" class="btn btn-secondary" onclick="cancelarPreview()">
+                            Cancelar
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="confirmarOrganizacion()">
+                            <span class="btn-icon">✓</span>
+                            Confirmar y Organizar
+                        </button>
+                    </div>
+                </div>
 
                 <div id="progressSection" class="progress-section hidden">
                     <div class="progress-header">
