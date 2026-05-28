@@ -558,8 +558,9 @@ select:focus {
 }
 
 .stat-label {
-    font-size: 0.85rem;
-    color: var(--color-text-light);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text);
     margin-top: 4px;
 }
 
@@ -1059,8 +1060,9 @@ code {
 }
 
 .preview-duplicados-label {
-    font-size: 0.85rem;
-    color: var(--color-text-light);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text);
 }
 
 .preview-categories {
@@ -1120,9 +1122,9 @@ code {
 .extension-count {
     background: var(--color-primary);
     color: white;
-    padding: 2px 10px;
+    padding: 4px 12px;
     border-radius: var(--radius-sm);
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 600;
 }
 
@@ -1380,8 +1382,12 @@ code {
 }
 
 .expandable-count {
-    font-size: 0.85rem;
-    color: var(--color-text-light);
-    font-weight: normal;
+    font-size: 1rem;
+    color: var(--color-text);
+    font-weight: 600;
     margin-left: var(--spacing-sm);
+    background: var(--color-primary);
+    color: white;
+    padding: 2px 10px;
+    border-radius: var(--radius-sm);
 }
