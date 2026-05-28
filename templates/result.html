@@ -88,7 +88,7 @@
                 <div id="archivosSection" style="display: none;">
                     <div class="section section-info" style="margin-top: 0;">
                         <h3 class="section-title" onclick="toggleSection('archivosSection', 'archIcon')" style="cursor: pointer;">
-                            📈 Estadísticas Adicionales <span id="archIcon">⌃</span>
+                            📈 Estadísticas Adicionales
                         </h3>
                         <div class="info-grid">
                             <div class="info-item">
@@ -115,7 +115,7 @@
                 <div id="categoriasSection" style="display: none;">
                     <div class="section" style="margin-top: 0;">
                         <h3 class="section-title" onclick="toggleSection('categoriasSection', 'catIcon')" style="cursor: pointer;">
-                            📁 Distribución por Categoría <span id="catIcon">⌃</span>
+                            📁 Distribución por Categoría
                         </h3>
                         <div class="category-grid">
                             {% for categoria, datos in resultado.estadisticas.por_categoria.items() %}
@@ -148,7 +148,7 @@
                 <div id="duplicadosSection" style="display: none;">
                     <div class="section section-warning" style="margin-top: 0;">
                         <h3 class="section-title" onclick="toggleSection('duplicadosSection', 'dupIcon')" style="cursor: pointer;">
-                            ⚠️ Archivos Duplicados Detectados <span id="dupIcon">⌃</span>
+                            ⚠️ Archivos Duplicados Detectados
                         </h3>
                         <div class="duplicate-summary">
                             <div class="duplicate-stat">
@@ -173,7 +173,7 @@
                 <div id="carpetasSection" style="display: none;">
                     <div class="section section-info" style="margin-top: 0;">
                         <h3 class="section-title" onclick="toggleSection('carpetasSection', 'carpIcon')" style="cursor: pointer;">
-                            🗑️ Carpetas Vacías Eliminadas <span id="carpIcon">⌃</span>
+                            🗑️ Carpetas Vacías Eliminadas
                         </h3>
                         <div class="duplicate-summary">
                             <div class="duplicate-stat">
@@ -385,13 +385,10 @@
         // Toggle de secciones
         function toggleSection(sectionId, iconId) {
             const section = document.getElementById(sectionId);
-            const icon = document.getElementById(iconId);
             if (section.style.display === 'none') {
                 section.style.display = 'block';
-                if (icon) icon.textContent = '⌃';
             } else {
                 section.style.display = 'none';
-                if (icon) icon.textContent = '⌄';
             }
         }
     </script>

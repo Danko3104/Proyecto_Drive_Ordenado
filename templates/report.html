@@ -56,7 +56,6 @@
                 <div class="report-section">
                     <h3 class="section-title" style="cursor: pointer;" onclick="toggleDuplicados('duplicadosSection', 'dupIcon')">
                         🔍 Archivos Duplicados
-                        <span id="dupIcon" style="float: right;">⌄</span>
                     </h3>
                     <div id="duplicadosSection" style="display: none;">
                         <p class="report-description">
@@ -86,7 +85,6 @@
                             📅 Distribución por Año
                             <span class="expandable-count">{{ estadisticas.resumen.años_cubiertos|length }} años</span>
                         </h3>
-                        <span class="expandable-icon" id="añosIcon">⌄</span>
                     </div>
                     <div id="añosSection" style="display: none; margin-top: var(--spacing);">
                         <div class="year-table-container">
@@ -119,7 +117,6 @@
                             📎 Extensiones Encontradas
                             <span class="expandable-count">{{ estadisticas.resumen.total_extensiones }} tipos</span>
                         </h3>
-                        <span class="expandable-icon" id="extIcon">⌄</span>
                     </div>
                     <div id="extSection" style="display: none; margin-top: var(--spacing);">
                         <div class="extension-list">
@@ -137,7 +134,6 @@
                 <div class="report-section">
                     <div class="expandable-header" onclick="toggleDuplicados('resumenSection', 'resumenIcon')">
                         <h3 class="section-title" style="margin: 0;">📈 Resumen Estadístico</h3>
-                        <span class="expandable-icon" id="resumenIcon">⌄</span>
                     </div>
                     <div id="resumenSection" style="display: none; margin-top: var(--spacing);">
                         <div class="stats-summary">
@@ -244,13 +240,10 @@
         // Función genérica para desplegar/ocultar secciones
         function toggleDuplicados(sectionId, iconId) {
             const section = document.getElementById(sectionId);
-            const icon = document.getElementById(iconId);
             if (section.style.display === 'none') {
                 section.style.display = 'block';
-                if (icon) icon.textContent = '⌃';
             } else {
                 section.style.display = 'none';
-                if (icon) icon.textContent = '⌄';
             }
         }
 
