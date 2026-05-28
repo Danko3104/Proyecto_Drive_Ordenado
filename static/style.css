@@ -114,7 +114,7 @@ body {
 .theme-toggle {
     position: absolute;
     top: var(--spacing);
-    right: var(--spacing);
+    left: var(--spacing);
     background: var(--color-card);
     border: 2px solid var(--color-border);
     border-radius: var(--radius);
