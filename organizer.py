@@ -305,6 +305,19 @@ def organizar_archivos(ruta_origen: str, ruta_destino: str = None,
         if resultado.get('error'):
             estadisticas['errores'] += 1
 
+    # Eliminar carpetas vacías en ruta_origen (después de mover archivos)
+    if ruta_origen != ruta_destino:
+        # Si son diferentes, limpiar ambas rutas
+        eliminadas_origen = eliminar_carpetas_vacias(ruta_origen)
+        eliminadas_destino = eliminar_carpetas_vacias(ruta_destino)
+        estadisticas['carpetas_vacias_eliminadas'] = eliminadas_origen + eliminadas_destino
+        estadisticas['carpetas_eliminadas_origen'] = eliminadas_origen
+        estadisticas['carpetas_eliminadas_destino'] = eliminadas_destino
+    else:
+        # Si es la misma ruta, solo limpiar una vez
+        eliminadas = eliminar_carpetas_vacias(ruta_origen)
+        estadisticas['carpetas_vacias_eliminadas'] = eliminadas
+
     return archivos_procesados, estadisticas
 
 
@@ -377,6 +390,52 @@ def obtener_preview_organizacion(ruta_origen: str, detectar_duplicados: bool = F
         'tamaño_total_mb': round(tamaño_total / (1024 * 1024), 2),
         'ruta_origen': ruta_origen
     }
+
+
+def eliminar_carpetas_vacias(ruta_base: str) -> int:
+    """
+    Elimina recursivamente las carpetas vacías dentro de una ruta base.
+
+    Primero elimina las carpetas más profundas (hojas), luego sube hacia la raíz.
+    Esto asegura que una carpeta padre se elimine si todos sus hijos fueron eliminados.
+
+    Args:
+        ruta_base: Ruta base desde donde comenzar a buscar carpetas vacías
+
+    Returns:
+        Cantidad de carpetas vacías eliminadas
+    """
+    if not os.path.exists(ruta_base) or not os.path.isdir(ruta_base):
+        return 0
+
+    eliminadas = 0
+
+    # Obtener todas las carpetas ordenadas por profundidad (de más profunda a menos)
+    todas_carpetas = []
+    for raiz, dirs, _ in os.walk(ruta_base):
+        for directorio in dirs:
+            ruta_completa = os.path.join(raiz, directorio)
+            # Calcular profundidad para ordenar
+            profundidad = ruta_completa.count(os.sep)
+            todas_carpetas.append((profundidad, ruta_completa))
+
+    # Ordenar de más profunda a menos profunda
+    todas_carpetas.sort(key=lambda x: x[0], reverse=True)
+
+    # Intentar eliminar cada carpeta (si está vacía)
+    for _, ruta_carpeta in todas_carpetas:
+        try:
+            if os.path.exists(ruta_carpeta):
+                # Verificar si está vacía
+                contenido = os.listdir(ruta_carpeta)
+                if len(contenido) == 0:
+                    os.rmdir(ruta_carpeta)
+                    eliminadas += 1
+        except (OSError, IOError):
+            # Si no se puede eliminar (permisos, no está vacía, etc.), continuar
+            pass
+
+    return eliminadas
 
 
 def obtener_estadisticas_adicionales(archivos_procesados: List[Dict]) -> Dict:

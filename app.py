@@ -241,6 +241,14 @@ def ejecutar_organizacion(ruta_origen: str, ruta_destino: str,
                 'grupos': estadisticas_duplicados.get('total_grupos_duplicados', 0)
             }
 
+        # Agregar información de carpetas eliminadas
+        if 'carpetas_vacias_eliminadas' in estadisticas:
+            estadisticas_completas['carpetas_eliminadas'] = {
+                'total': estadisticas.get('carpetas_vacias_eliminadas', 0),
+                'origen': estadisticas.get('carpetas_eliminadas_origen', 0),
+                'destino': estadisticas.get('carpetas_eliminadas_destino', 0)
+            }
+
         # Guardar resultado
         estado_proceso['resultado'] = {
             'archivos_procesados': len(archivos_procesados),
