@@ -512,8 +512,8 @@ select:focus {
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: var(--spacing);
-    padding: var(--spacing-lg);
+    gap: 12px;
+    padding: var(--spacing);
 }
 
 @media (max-width: 640px) {
@@ -531,7 +531,7 @@ select:focus {
 .stat-card {
     background: var(--color-bg);
     border-radius: var(--radius);
-    padding: var(--spacing-md);
+    padding: var(--spacing);
     text-align: center;
     border: 2px solid transparent;
     transition: var(--transition);
