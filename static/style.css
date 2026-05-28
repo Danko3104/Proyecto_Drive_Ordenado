@@ -1238,3 +1238,45 @@ code {
     background: var(--color-secondary);
     border-radius: 3px;
 }
+
+/* ============================================
+   ESTILOS PARA SECCIONES DESPLEGABLES
+   ============================================ */
+
+.expandable-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.expandable-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.expandable-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing);
+    background: var(--color-bg);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-bottom: var(--spacing);
+}
+
+.expandable-header:hover {
+    background: var(--color-border);
+}
+
+.expandable-icon {
+    font-size: 1.2rem;
+    color: var(--color-text-light);
+}
+
+.expandable-count {
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    font-weight: normal;
+    margin-left: var(--spacing-sm);
+}

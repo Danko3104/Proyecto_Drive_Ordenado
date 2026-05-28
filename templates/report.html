@@ -31,15 +31,23 @@
 
                 <!-- SECCIÓN DE GRÁFICAS -->
                 <div class="report-section">
-                    <h3 class="section-title">📊 Gráficas de Distribución</h3>
+                    <h3 class="section-title">📊 Visualización de Datos</h3>
                     <div class="charts-grid">
                         <div class="chart-container">
-                            <h4>Por Categoría</h4>
+                            <h4>Distribución por Categoría</h4>
                             <canvas id="chartCategorias"></canvas>
                         </div>
                         <div class="chart-container">
-                            <h4>Por Año</h4>
+                            <h4>Archivos por Año</h4>
                             <canvas id="chartAños"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Top Extensiones</h4>
+                            <canvas id="chartExtensiones"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Distribución de Tamaños</h4>
+                            <canvas id="chartTamaños"></canvas>
                         </div>
                     </div>
                 </div>
@@ -47,9 +55,9 @@
                 <!-- SECCIÓN DE DUPLICADOS DESPLEGABLE -->
                 {% if duplicados_detalle and duplicados_detalle|length > 0 %}
                 <div class="report-section">
-                    <h3 class="section-title" style="cursor: pointer;" onclick="toggleDuplicados()">
+                    <h3 class="section-title" style="cursor: pointer;" onclick="toggleDuplicados('duplicadosSection', 'dupIcon')">
                         🔍 Archivos Duplicados
-                        <span id="toggleIcon" style="float: right;">▼</span>
+                        <span id="dupIcon" style="float: right;">▼</span>
                     </h3>
                     <div id="duplicadosSection" style="display: none;">
                         <p class="report-description">
@@ -72,50 +80,54 @@
                 </div>
                 {% endif %}
 
+                <!-- DISTRIBUCIÓN POR AÑO (DESPLEGABLE) -->
                 <div class="report-section">
-                    <h3 class="section-title">Distribución por Año</h3>
-                    <div class="year-table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Año</th>
-                                    <th>Cantidad de Archivos</th>
-                                    <th>Tamaño Total (MB)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for año, datos in estadisticas.por_año.items() %}
-                                <tr>
-                                    <td>{{ año }}</td>
-                                    <td>{{ datos.cantidad }}</td>
-                                    <td>{{ "%.2f"|format(datos.tamaño_mb) }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="expandable-header" onclick="toggleDuplicados('añosSection', 'añosIcon')">
+                        <h3 class="section-title" style="margin: 0;">📅 Distribución por Año</h3>
+                        <span class="expandable-icon" id="añosIcon">▼</span>
                     </div>
-                </div>
-
-                <div class="report-section">
-                    <h3 class="section-title">Extensiones Encontradas</h3>
-                    <div class="extension-list">
-                        {% for ext, datos in estadisticas.por_extension.items() %}
-                        <div class="extension-badge">
-                            <span class="ext-name">{{ ext }}</span>
-                            <span class="ext-count">{{ datos.cantidad }}</span>
+                    <div id="añosSection" style="display: none; margin-top: var(--spacing);">
+                        <div class="year-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Año</th>
+                                        <th>Cantidad de Archivos</th>
+                                        <th>Tamaño Total (MB)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for año, datos in estadisticas.por_año.items() %}
+                                    <tr>
+                                        <td>{{ año }}</td>
+                                        <td>{{ datos.cantidad }}</td>
+                                        <td>{{ "%.2f"|format(datos.tamaño_mb) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
-                        {% endfor %}
                     </div>
                 </div>
 
+                <!-- EXTENSIONES (DESPLEGABLE) -->
                 <div class="report-section">
-                    <h3 class="section-title">Ejemplo de Salida CSV</h3>
-                    <div class="csv-preview">
-                        <pre><code>nombre_original,extension,categoria,tamaño_bytes,fecha_modificacion,ruta_destino,es_duplicado
-archivo1.pdf,.pdf,documentos,154320,2024-03-15 10:30:00,/ruta/destino/Documentos/2024/Marzo/archivo1.pdf,No
-imagen1.jpg,.jpg,imagenes,2048560,2023-12-20 14:45:00,/ruta/destino/Imagenes/2023/Diciembre/imagen1.jpg,No
-video1.mp4,.mp4,multimedia,15240000,2024-01-10 09:15:00,/ruta/destino/Multimedia/2024/Enero/video1.mp4,Si
-documento.docx,.docx,documentos,45200,2024-05-22 16:20:00,/ruta/destino/Documentos/2024/Mayo/documento.docx,No</code></pre>
+                    <div class="expandable-header" onclick="toggleDuplicados('extSection', 'extIcon')">
+                        <h3 class="section-title" style="margin: 0;">
+                            📎 Extensiones Encontradas
+                            <span class="expandable-count">{{ estadisticas.resumen.total_extensiones }} tipos</span>
+                        </h3>
+                        <span class="expandable-icon" id="extIcon">▼</span>
+                    </div>
+                    <div id="extSection" style="display: none; margin-top: var(--spacing);">
+                        <div class="extension-list">
+                            {% for ext, datos in estadisticas.por_extension.items() %}
+                            <div class="extension-badge">
+                                <span class="ext-name">{{ ext }}</span>
+                                <span class="ext-count">{{ datos.cantidad }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
 
@@ -221,24 +233,29 @@ documento.docx,.docx,documentos,45200,2024-05-22 16:20:00,/ruta/destino/Document
             inicializarTema();
         })();
 
-        // Función para desplegar/ocultar duplicados
-        function toggleDuplicados() {
-            const section = document.getElementById('duplicadosSection');
-            const icon = document.getElementById('toggleIcon');
+        // Función genérica para desplegar/ocultar secciones
+        function toggleDuplicados(sectionId, iconId) {
+            const section = document.getElementById(sectionId);
+            const icon = document.getElementById(iconId);
             if (section.style.display === 'none') {
                 section.style.display = 'block';
-                icon.textContent = '▲';
+                if (icon) icon.textContent = '▲';
             } else {
                 section.style.display = 'none';
-                icon.textContent = '▼';
+                if (icon) icon.textContent = '▼';
             }
         }
 
         // Configuración de gráficas
         {% if estadisticas %}
+        const textColor = getComputedStyle(document.body).getPropertyValue('--color-text').trim() || '#1e293b';
+        const gridColor = getComputedStyle(document.body).getPropertyValue('--color-border').trim() || '#e2e8f0';
+
         const chartColors = {
-            categorias: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
-            años: ['#06b6d4', '#ec4899', '#84cc16', '#f97316']
+            categorias: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'],
+            años: ['#06b6d4', '#ec4899', '#84cc16', '#f97316'],
+            extensiones: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
+            tamaños: ['#3b82f6', '#10b981', '#f59e0b']
         };
 
         // Gráfica de Categorías
@@ -293,20 +310,74 @@ documento.docx,.docx,documentos,45200,2024-05-22 16:20:00,/ruta/destino/Document
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            color: getComputedStyle(document.body).getPropertyValue('--color-text') || '#1e293b'
-                        },
-                        grid: {
-                            color: getComputedStyle(document.body).getPropertyValue('--color-border') || '#e2e8f0'
-                        }
+                        ticks: { color: textColor },
+                        grid: { color: gridColor }
                     },
                     x: {
-                        ticks: {
-                            color: getComputedStyle(document.body).getPropertyValue('--color-text') || '#1e293b'
-                        },
-                        grid: {
-                            display: false
-                        }
+                        ticks: { color: textColor },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+        {% endif %}
+
+        // Gráfica de Extensiones
+        {% if estadisticas.por_extension %}
+        new Chart(document.getElementById('chartExtensiones'), {
+            type: 'pie',
+            data: {
+                labels: [{% for ext in estadisticas.por_extension.keys() %}'{{ ext }}'{% if not loop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for datos in estadisticas.por_extension.values() %}{{ datos.cantidad }}{% if not loop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: chartColors.extensiones
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: textColor, boxWidth: 12 }
+                    }
+                }
+            }
+        });
+        {% endif %}
+
+        // Gráfica de Tamaños
+        {% if estadisticas.tamaño_stats %}
+        new Chart(document.getElementById('chartTamaños'), {
+            type: 'bar',
+            data: {
+                labels: ['Promedio', 'Mínimo', 'Máximo'],
+                datasets: [{
+                    label: 'MB',
+                    data: [
+                        {{ estadisticas.tamaño_stats.promedio_mb }},
+                        {{ estadisticas.tamaño_stats.minimo_mb }},
+                        {{ estadisticas.tamaño_stats.maximo_mb }}
+                    ],
+                    backgroundColor: chartColors.tamaños,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: textColor },
+                        grid: { color: gridColor }
+                    },
+                    x: {
+                        ticks: { color: textColor },
+                        grid: { display: false }
                     }
                 }
             }

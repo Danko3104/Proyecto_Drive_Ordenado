@@ -44,10 +44,10 @@
                         <div class="stat-label">Archivos procesados</div>
                     </div>
 
-                    <div class="stat-card stat-success">
+                    <div class="stat-card stat-success expandable-card" onclick="toggleSection('categoriasSection', 'catIcon')">
                         <div class="stat-icon">📂</div>
                         <div class="stat-value" id="statCategorias">{{ resultado.estadisticas.resumen.total_categorias }}</div>
-                        <div class="stat-label">Categorías</div>
+                        <div class="stat-label">Categorías ▼</div>
                     </div>
 
                     <div class="stat-card stat-info">
@@ -56,57 +56,75 @@
                         <div class="stat-label">MB totales</div>
                     </div>
 
-                    <div class="stat-card stat-warning">
+                    {% if resultado.estadisticas.duplicados.cantidad > 0 %}
+                    <div class="stat-card stat-warning expandable-card" onclick="toggleSection('duplicadosSection', 'dupIcon')">
                         <div class="stat-icon">🔍</div>
                         <div class="stat-value" id="statDuplicados">{{ resultado.estadisticas.duplicados.cantidad }}</div>
+                        <div class="stat-label">Duplicados ▼</div>
+                    </div>
+                    {% else %}
+                    <div class="stat-card stat-success">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value">0</div>
                         <div class="stat-label">Duplicados</div>
                     </div>
+                    {% endif %}
                 </div>
 
-                <div class="section">
-                    <h3 class="section-title">📁 Distribución por Categoría</h3>
-                    <div class="category-grid">
-                        {% for categoria, datos in resultado.estadisticas.por_categoria.items() %}
-                        <div class="category-card">
-                            <div class="category-header">
-                                <span class="category-icon">
-                                    {% if categoria == 'documentos' %}📄
-                                    {% elif categoria == 'imagenes' %}🖼️
-                                    {% elif categoria == 'multimedia' %}🎬
-                                    {% else %}📦{% endif %}
-                                </span>
-                                <span class="category-name">{{ categoria.capitalize() }}</span>
+                <!-- CATEGORÍAS DESPLEGABLE -->
+                <div id="categoriasSection" style="display: none;">
+                    <div class="section" style="margin-top: 0;">
+                        <h3 class="section-title" onclick="toggleSection('categoriasSection', 'catIcon')" style="cursor: pointer;">
+                            📁 Distribución por Categoría <span id="catIcon">▲</span>
+                        </h3>
+                        <div class="category-grid">
+                            {% for categoria, datos in resultado.estadisticas.por_categoria.items() %}
+                            <div class="category-card">
+                                <div class="category-header">
+                                    <span class="category-icon">
+                                        {% if categoria == 'documentos' %}📄
+                                        {% elif categoria == 'imagenes' %}🖼️
+                                        {% elif categoria == 'multimedia' %}🎬
+                                        {% else %}📦{% endif %}
+                                    </span>
+                                    <span class="category-name">{{ categoria.capitalize() }}</span>
+                                </div>
+                                <div class="category-stats">
+                                    <div class="category-count">{{ datos.cantidad }} archivos</div>
+                                    <div class="category-size">{{ "%.2f"|format(datos.tamaño_bytes / (1024*1024)) }} MB</div>
+                                </div>
+                                <div class="category-bar">
+                                    {% set porcentaje = (datos.cantidad / resultado.archivos_procesados * 100) if resultado.archivos_procesados > 0 else 0 %}
+                                    <div class="category-fill" style="width: {{ porcentaje }}%"></div>
+                                </div>
                             </div>
-                            <div class="category-stats">
-                                <div class="category-count">{{ datos.cantidad }} archivos</div>
-                                <div class="category-size">{{ "%.2f"|format(datos.tamaño_bytes / (1024*1024)) }} MB</div>
-                            </div>
-                            <div class="category-bar">
-                                {% set porcentaje = (datos.cantidad / resultado.archivos_procesados * 100) if resultado.archivos_procesados > 0 else 0 %}
-                                <div class="category-fill" style="width: {{ porcentaje }}%"></div>
-                            </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
                     </div>
                 </div>
 
+                <!-- DUPLICADOS DESPLEGABLE -->
                 {% if resultado.estadisticas.duplicados.cantidad > 0 %}
-                <div class="section section-warning">
-                    <h3 class="section-title">⚠️ Archivos Duplicados Detectados</h3>
-                    <div class="duplicate-summary">
-                        <div class="duplicate-stat">
-                            <span class="duplicate-value">{{ resultado.estadisticas.duplicados.cantidad }}</span>
-                            <span class="duplicate-label">archivos duplicados</span>
+                <div id="duplicadosSection" style="display: none;">
+                    <div class="section section-warning" style="margin-top: 0;">
+                        <h3 class="section-title" onclick="toggleSection('duplicadosSection', 'dupIcon')" style="cursor: pointer;">
+                            ⚠️ Archivos Duplicados Detectados <span id="dupIcon">▲</span>
+                        </h3>
+                        <div class="duplicate-summary">
+                            <div class="duplicate-stat">
+                                <span class="duplicate-value">{{ resultado.estadisticas.duplicados.cantidad }}</span>
+                                <span class="duplicate-label">archivos duplicados</span>
+                            </div>
+                            <div class="duplicate-stat">
+                                <span class="duplicate-value">{{ resultado.estadisticas.duplicados.espacio_ocupado_mb }}</span>
+                                <span class="duplicate-label">MB ocupados innecesariamente</span>
+                            </div>
                         </div>
-                        <div class="duplicate-stat">
-                            <span class="duplicate-value">{{ resultado.estadisticas.duplicados.espacio_ocupado_mb }}</span>
-                            <span class="duplicate-label">MB ocupados innecesariamente</span>
-                        </div>
+                        <p class="duplicate-note">
+                            Los archivos duplicados han sido marcados en el reporte CSV pero no han sido eliminados.
+                            <a href="/reporte" style="color: var(--color-primary);">Ver detalles completos →</a>
+                        </p>
                     </div>
-                    <p class="duplicate-note">
-                        Los archivos duplicados han sido marcados en el reporte CSV pero no han sido eliminados.
-                        Puedes revisarlos manualmente en la ubicación indicada.
-                    </p>
                 </div>
                 {% endif %}
 
@@ -220,6 +238,19 @@
 
             inicializarTema();
         })();
+
+        // Toggle de secciones
+        function toggleSection(sectionId, iconId) {
+            const section = document.getElementById(sectionId);
+            const icon = document.getElementById(iconId);
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                if (icon) icon.textContent = '▲';
+            } else {
+                section.style.display = 'none';
+                if (icon) icon.textContent = '▼';
+            }
+        }
     </script>
 </body>
 </html>
