@@ -306,9 +306,11 @@ Puedes:
 
 ---
 
-## 📁 Estructura de carpetas generada
+## 📁 Estructuras de carpetas generadas
 
-Cuando organizas por **tipo**, **fecha** y **extensión**, queda así:
+Según el **criterio** y las opciones que elijas, la carpeta se organiza de diferentes formas:
+
+### 1️⃣ Por Tipo + Fecha + Extensión
 
 ```
 MiCarpeta_Organizada/
@@ -317,19 +319,18 @@ MiCarpeta_Organizada/
 │   │   ├── Enero/
 │   │   │   └── pdf/
 │   │   │       └── archivo.pdf
-│   │   ├── Febrero/
 │   │   └── Marzo/
 │   │       ├── docx/
 │   │       │   └── documento.docx
 │   │       └── pdf/
 │   │           └── otro.pdf
-├── Imágenes/
-│   ├── 2024/
-│   │   └── Marzo/
-│   │       ├── jpg/
-│   │       │   └── foto.jpg
-│   │       └── png/
-│   │           └── imagen.png
+├── Imagenes/
+│   └── 2024/
+│       └── Marzo/
+│           ├── jpg/
+│           │   └── foto.jpg
+│           └── png/
+│               └── imagen.png
 ├── Multimedia/
 │   └── 2024/
 │       └── Febrero/
@@ -339,6 +340,155 @@ MiCarpeta_Organizada/
     └── 2024/
         └── zip/
             └── archivo.zip
+```
+
+### 2️⃣ Por Tipo + Extensión (sin Fecha)
+
+```
+MiCarpeta_Organizada/
+├── Documentos/
+│   ├── pdf/
+│   │   └── archivo.pdf
+│   └── docx/
+│       └── documento.docx
+├── Imagenes/
+│   ├── jpg/
+│   │   └── foto.jpg
+│   └── png/
+│       └── imagen.png
+├── Multimedia/
+│   └── mp4/
+│       └── video.mp4
+└── Otros/
+    └── zip/
+        └── archivo.zip
+```
+
+### 3️⃣ Por Tipo + Fecha (sin Extensión)
+
+```
+MiCarpeta_Organizada/
+├── Documentos/
+│   └── 2024/
+│       ├── Enero/
+│       │   └── archivo.pdf
+│       └── Marzo/
+│           ├── documento.docx
+│           └── otro.pdf
+├── Imagenes/
+│   └── 2024/
+│       └── Marzo/
+│           ├── foto.jpg
+│           └── imagen.png
+├── Multimedia/
+│   └── 2024/
+│       └── Febrero/
+│           └── video.mp4
+└── Otros/
+    └── 2024/
+        └── archivo.zip
+```
+
+### 4️⃣ Solo por Tipo
+
+```
+MiCarpeta_Organizada/
+├── Documentos/
+│   ├── archivo.pdf
+│   └── documento.docx
+├── Imagenes/
+│   ├── foto.jpg
+│   └── imagen.png
+├── Multimedia/
+│   └── video.mp4
+└── Otros/
+    └── archivo.zip
+```
+
+### 5️⃣ Por Fecha + Categoría + Extensión
+
+```
+MiCarpeta_Organizada/
+├── 2024/
+│   ├── Enero/
+│   │   └── Documentos/
+│   │       └── pdf/
+│   │           └── archivo.pdf
+│   ├── Febrero/
+│   │   └── Multimedia/
+│   │       └── mp4/
+│   │           └── video.mp4
+│   └── Marzo/
+│       ├── Documentos/
+│       │   ├── docx/
+│       │   │   └── documento.docx
+│       │   └── pdf/
+│       │       └── otro.pdf
+│       └── Imagenes/
+│           ├── jpg/
+│           │   └── foto.jpg
+│           └── png/
+│               └── imagen.png
+```
+
+### 6️⃣ Por Fecha + Categoría (sin Extensión)
+
+```
+MiCarpeta_Organizada/
+├── 2024/
+│   ├── Enero/
+│   │   └── Documentos/
+│   │       └── archivo.pdf
+│   ├── Febrero/
+│   │   └── Multimedia/
+│   │       └── video.mp4
+│   └── Marzo/
+│       ├── Documentos/
+│       │   ├── documento.docx
+│       │   └── otro.pdf
+│       └── Imagenes/
+│           ├── foto.jpg
+│           └── imagen.png
+```
+
+### 7️⃣ Por Tamaño + Categoría + Extensión
+
+```
+MiCarpeta_Organizada/
+├── Pequeños_1MB/
+│   └── Documentos/
+│       └── pdf/
+│           └── archivo.pdf
+├── Medianos_1-10MB/
+│   └── Imagenes/
+│       └── png/
+│           └── imagen.png
+├── Grandes_10-100MB/
+│   └── Multimedia/
+│       └── mp4/
+│           └── video.mp4
+└── Muy_Grandes_100MB+/
+    └── Documentos/
+        └── docx/
+            └── documento.docx
+```
+
+### 8️⃣ Por Tamaño + Categoría (sin Extensión)
+
+```
+MiCarpeta_Organizada/
+├── Pequeños_1MB/
+│   └── Documentos/
+│       └── archivo.pdf
+├── Medianos_1-10MB/
+│   └── Imagenes/
+│       └── imagen.png
+├── Grandes_10-100MB/
+│   └── Multimedia/
+│       └── video.mp4
+└── Muy_Grandes_100MB+/
+    └── Documentos/
+        └── documento.docx
 ```
 
 ---
