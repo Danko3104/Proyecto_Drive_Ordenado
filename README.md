@@ -108,18 +108,45 @@ drive.mount('/content/drive')
 
 ### Paso 7: Crear túnel público
 
-```bash
+```python
 # Crear el enlace público para acceder desde cualquier navegador
-# Este comando muestra la URL al cabo de unos segundos
-!./cloudflared-linux-amd64 tunnel --url http://localhost:5000
+import subprocess
+import time
+import re
+
+# Iniciar cloudflared en background
+process = subprocess.Popen(
+    ['./cloudflared-linux-amd64', 'tunnel', '--url', 'http://localhost:5000'],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    text=True
+)
+
+print("⏳ Generando enlace público...")
+time.sleep(8)
+
+# Leer output para encontrar la URL
+url = None
+for _ in range(50):
+    line = process.stdout.readline()
+    match = re.search(r'https://[a-z0-9-]+\.trycloudflare\.com', line)
+    if match:
+        url = match.group(0)
+        break
+
+if url:
+    print("\n" + "="*60)
+    print("🎉 ENLACE LISTO - ABRE ESTA URL:")
+    print("="*60)
+    print(f"\n    {url}\n")
+    print("="*60)
+    print("⚠️  Este enlace es temporal, cambia cada vez que reinicias")
+    print("="*60)
+else:
+    print("❌ No se pudo obtener la URL. Intenta ejecutar el paso 7 de nuevo.")
 ```
 
-Después de unos segundos verás una URL como:
-```
-https://xxxx-xxxx-xxxx.trycloudflare.com
-```
-
-Haz clic en esa URL para abrir la aplicación.
+**Haz clic en la URL que aparece arriba** para abrir la aplicación.
 
 ---
 
