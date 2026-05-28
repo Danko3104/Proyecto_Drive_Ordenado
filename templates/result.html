@@ -39,10 +39,10 @@
 
                 <div class="stats-grid">
                     <!-- Primera fila: Información principal -->
-                    <div class="stat-card stat-primary">
+                    <div class="stat-card stat-primary expandable-card" onclick="toggleSection('archivosSection', 'archIcon')">
                         <div class="stat-icon">📄</div>
                         <div class="stat-value" id="statTotal">{{ resultado.archivos_procesados }}</div>
-                        <div class="stat-label">Archivos procesados</div>
+                        <div class="stat-label">Archivos procesados ▼</div>
                     </div>
 
                     <div class="stat-card stat-success expandable-card" onclick="toggleSection('categoriasSection', 'catIcon')">
@@ -75,9 +75,36 @@
                     <div class="stat-card stat-info expandable-card" onclick="toggleSection('carpetasSection', 'carpIcon')">
                         <div class="stat-icon">🗑️</div>
                         <div class="stat-value" id="statCarpetas">{{ resultado.estadisticas.carpetas_eliminadas.total }}</div>
-                        <div class="stat-label">Carpetas elim. ▼</div>
+                        <div class="stat-label">Carpetas eliminadas ▼</div>
                     </div>
                     {% endif %}
+                </div>
+
+                <!-- ARCHIVOS PROCESADOS DESPLEGABLE (Estadísticas Adicionales) -->
+                <div id="archivosSection" style="display: none;">
+                    <div class="section section-info" style="margin-top: 0;">
+                        <h3 class="section-title" onclick="toggleSection('archivosSection', 'archIcon')" style="cursor: pointer;">
+                            📈 Estadísticas Adicionales <span id="archIcon">▲</span>
+                        </h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Extensiones únicas:</span>
+                                <span class="info-value">{{ resultado.estadisticas.resumen.total_extensiones }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Tamaño promedio:</span>
+                                <span class="info-value">{{ resultado.estadisticas.tamaño_stats.promedio_mb }} MB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Archivo más grande:</span>
+                                <span class="info-value">{{ resultado.estadisticas.tamaño_stats.maximo_mb }} MB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Años cubiertos:</span>
+                                <span class="info-value">{{ resultado.estadisticas.resumen.años_cubiertos|join(', ') }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- CATEGORÍAS DESPLEGABLE -->
@@ -168,28 +195,6 @@
                     </div>
                 </div>
                 {% endif %}
-
-                <div class="section">
-                    <h3 class="section-title">📈 Estadísticas Adicionales</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Extensiones únicas:</span>
-                            <span class="info-value">{{ resultado.estadisticas.resumen.total_extensiones }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Tamaño promedio:</span>
-                            <span class="info-value">{{ resultado.estadisticas.tamaño_stats.promedio_mb }} MB</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Archivo más grande:</span>
-                            <span class="info-value">{{ resultado.estadisticas.tamaño_stats.maximo_mb }} MB</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Años cubiertos:</span>
-                            <span class="info-value">{{ resultado.estadisticas.resumen.años_cubiertos|join(', ') }}</span>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="section">
                     <h3 class="section-title">📁 Estructura de Carpetas Generada</h3>
