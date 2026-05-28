@@ -1323,7 +1323,7 @@ code {
 .charts-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-lg);
+    gap: var(--spacing);
     margin-top: var(--spacing-md);
     align-items: start;
 }
@@ -1349,12 +1349,8 @@ code {
 }
 
 .chart-container canvas {
-    max-height: 300px;
-    height: 300px;
-}
-
-.chart-container canvas {
-    max-height: 250px;
+    max-height: 220px;
+    height: auto;
 }
 
 /* Espaciado entre gráficas y secciones desplegables */
