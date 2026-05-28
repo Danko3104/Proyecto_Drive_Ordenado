@@ -15,7 +15,7 @@ Aplicación web que automatiza la organización de archivos en Google Drive mont
 
 **Drive Ordenado** es una aplicación web desarrollada en Python con Flask que permite organizar automáticamente archivos en Google Drive. El usuario interactúa desde el navegador sin necesidad de tocar código, indicando la ruta de Drive y configurando opciones según sus necesidades.
 
-### Funcionalidades principales:
+### ✨ Funcionalidades principales:
 
 - **Escaneo recursivo** de archivos en cualquier carpeta
 - **Clasificación automática** por tipo (documentos, imágenes, multimedia, otros)
@@ -24,6 +24,7 @@ Aplicación web que automatiza la organización de archivos en Google Drive mont
 - **Preview antes de organizar** con resumen de archivos y estadísticas
 - **Detección de duplicados** mediante hash MD5
 - **Generación de reportes CSV** con estadísticas detalladas
+- **Modo oscuro/claro** 🌙☀️ - elige tu tema preferido
 - **Interfaz web moderna** y responsive
 - **Acceso público** mediante tunneling con trycloudflare
 
@@ -41,78 +42,116 @@ Aplicación web que automatiza la organización de archivos en Google Drive mont
 
 ---
 
-## ✅ Requisitos Previos
+## 🚀 Cómo usar en Google Colab (2 Opciones)
 
-1. **Google Colab** con acceso a Google Drive montado
-2. **Python 3.8** o superior
-3. **Conexión a internet** para descargar dependencias
+### ⚡ OPCIÓN 1: RÁPIDA (Recomendada)
 
----
+Perfecta si quieres empezar ya. Solo copia y pega:
 
-## 🚀 Instrucciones de Instalación y Uso en Google Colab
-
-### Paso 1: Montar Google Drive
-
+**Celda 1 - Conectar Drive:**
 ```python
-# Conectar tu Google Drive a Colab
+# 🔗 Conecta tu Google Drive a Colab
 from google.colab import drive
 drive.mount('/content/drive')
 ```
 
-### Paso 2: Clonar el repositorio (SIEMPRE FRESH)
-
+**Celda 2 - Descargar e iniciar todo automático:**
 ```bash
-# Eliminar carpeta si existe de antes (para asegurar código actualizado)
-!rm -rf Proyecto_Drive_Ordenado
-
-# Descargar el código desde GitHub
+# 📥 Descargar el proyecto (código más reciente)
+!rm -rf Proyecto_Drive_Ordenado  # Borra si existe
 !git clone https://github.com/Danko3104/Proyecto_Drive_Ordenado.git
+
+# 📂 Entrar a la carpeta
+%cd Proyecto_Drive_Ordenado
+
+# 🚀 Ejecutar setup automático (hace TODO por ti)
+!python3 setup_colab.py
 ```
 
-### Paso 3: Entrar al directorio del proyecto
+**Listo!** Espera unos segundos y verás la URL. Ábrela en tu navegador. ✅
+
+---
+
+### 🔧 OPCIÓN 2: PASO A PASO (Para entender qué pasa)
+
+Si prefieres ver cada paso y entender qué está pasando:
+
+#### Paso 1: Conectar tu Google Drive
+
+Primero necesitamos que Colab pueda acceder a tus archivos de Drive.
+
+```python
+# 🔗 Esto abrirá una ventana para que autorices el acceso
+from google.colab import drive
+drive.mount('/content/drive')
+```
+
+Verás un link - haz clic, elige tu cuenta de Google y copia el código que te dan. Pégalo en Colab y presiona Enter.
+
+#### Paso 2: Descargar el proyecto
+
+Ahora vamos a bajar el código desde GitHub:
 
 ```bash
-# Cambiar a la carpeta del proyecto
+# 🗑️ Primero borramos si habías descargado algo antes
+# (para asegurarnos de tener la última versión)
+!rm -rf Proyecto_Drive_Ordenado
+
+# 📥 Ahora sí, descargamos el proyecto
+!git clone https://github.com/Danko3104/Proyecto_Drive_Ordenado.git
+
+# 📂 Entramos a la carpeta que acabamos de crear
 %cd Proyecto_Drive_Ordenado
 ```
 
-### Paso 4: Instalar dependencias
+#### Paso 3: Instalar lo que necesita la app
+
+La aplicación necesita algunas librerías de Python para funcionar:
 
 ```bash
-# Instalar Flask y otras librerías necesarias
+# 📦 Instalamos Flask (para el servidor web)
+# Pandas y Numpy (para manejar los datos)
 !pip install flask pandas numpy
 ```
 
-### Paso 5: Descargar cloudflared (para crear el túnel)
+Esto tomará unos segundos. Verás mucho texto - es normal, está instalando todo.
+
+#### Paso 4: Descargar el "puente" a internet
+
+Necesitamos un programa que cree un enlace público para tu app:
 
 ```bash
-# Descargar el programa que crea el enlace público
+# 📥 Descargamos cloudflared (el programa que crea el enlace)
 !wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
 
-# Dar permisos de ejecución
+# 🔓 Le damos permisos para ejecutarse
 !chmod +x cloudflared-linux-amd64
 ```
 
-### Paso 6: Iniciar el servidor Flask
+#### Paso 5: Iniciar el servidor
+
+Ahora arrancamos la aplicación web:
 
 ```bash
-# Iniciar el servidor web en segundo plano (no muestra logs aquí)
+# 🚀 Iniciamos el servidor en segundo plano
+# (nohup significa "no cuelgues cuando cierro" - técnico pero útil)
 !nohup python3 app.py > flask.log 2>&1 &
 
-# Esperar 3 segundos a que inicie
+# ⏳ Esperamos 3 segundos a que arranque
 !sleep 3
 
-# Verificar que está corriendo
-!curl -s http://localhost:5000 > /dev/null && echo "✅ Servidor listo" || echo "❌ Error al iniciar"
+# ✅ Verificamos que todo está OK
+!curl -s http://localhost:5000 > /dev/null && echo "✅ Servidor listo!" || echo "❌ Algo salió mal"
 ```
 
-### Paso 7: Crear túnel público
+Si ves "✅ Servidor listo!" todo va bien. Si ves error, intenta esperar un poco más y ejecutar de nuevo.
 
-**IMPORTANTE:** Esta celda debe quedarse corriendo. No la detengas o el enlace dejará de funcionar.
+#### Paso 6: Crear el enlace público
+
+**⚠️ IMPORTANTE:** Esta celda se debe quedar corriendo. No la detengas o el enlace morirá.
 
 ```python
-# Crear el enlace público para acceder desde cualquier navegador
-# Esta celda se queda ejecutando para mantener el túnel activo
+# 🌐 Este código crea el túnel y muestra tu URL
 import subprocess
 import time
 import re
@@ -121,7 +160,7 @@ import sys
 print("⏳ Iniciando túnel...")
 print("="*60)
 
-# Iniciar cloudflared y capturar output
+# Iniciamos cloudflared
 process = subprocess.Popen(
     ['./cloudflared-linux-amd64', 'tunnel', '--url', 'http://localhost:5000'],
     stdout=subprocess.PIPE,
@@ -132,33 +171,33 @@ process = subprocess.Popen(
 
 url_mostrada = False
 
-# Leer output línea por línea
+# Leemos el output hasta encontrar la URL
 for line in process.stdout:
     line = line.strip()
     
-    # Buscar y mostrar la URL cuando aparezca
+    # Cuando encontramos la URL, la mostramos BONITO
     if not url_mostrada:
         match = re.search(r'https://[a-z0-9-]+\.trycloudflare\.com', line)
         if match:
             url = match.group(0)
             print("\n" + "🎉"*20)
             print("\n" + "="*60)
-            print("  ✅ TÚNEL LISTO - ABRE ESTA URL EN TU NAVEGADOR:")
+            print("  ✅ ¡TU ENLACE ESTÁ LISTO!")
+            print("  Abre esta URL en tu navegador:")
             print("="*60)
             print(f"\n       {url}\n")
             print("="*60)
-            print("  ⚠️  NO CIERRES ESTA CELDA O EL ENLADO DEJARÁ DE FUNCIONAR")
+            print("  ⚠️  NO CIERRES ESTA CELDA")
+            print("  O el enlace dejará de funcionar")
             print("="*60 + "\n")
             url_mostrada = True
             continue
     
-    # Mostrar solo mensajes importantes
-    if 'INF' in line:
-        if 'connection' in line.lower() or 'tunnel' in line.lower():
-            print(f"  [OK] {line.split('INF')[-1].strip()}")
-    elif 'error' in line.lower() or 'failed' in line.lower():
-        print(f"  [ERROR] {line}")
+    # Mostramos mensajes de estado
+    if 'INF' in line and ('connection' in line.lower() or 'tunnel' in line.lower()):
+        print(f"  [OK] {line.split('INF')[-1].strip()}")
 
+# Mantenemos la celda viva
 try:
     process.wait()
 except KeyboardInterrupt:
@@ -167,72 +206,59 @@ except KeyboardInterrupt:
     sys.exit(0)
 ```
 
-**Después de ver la URL, ábrela en tu navegador.**
-
-⚠️ **IMPORTANTE:** Mantén esta celda ejecutándose. Si la detienes, el enlace dejará de funcionar.
+**Cuando veas la URL**, ábrela en tu navegador. La celda seguirá corriendo - eso es bueno, significa que el enlace sigue vivo.
 
 ---
 
 ## 🌓 Características de la interfaz
 
-- **Modo Oscuro/Claro**: Botón 🌙/☀️ en la esquina superior derecha para cambiar tema
-- **Preview antes de organizar**: Muestra estadísticas antes de mover archivos
-- **Advertencia de seguridad**: Alerta si intentas organizar todo tu Drive
+Una vez dentro de la app verás:
+
+- **🌙☀️ Botón de tema**: En la esquina superior derecha, cambia entre claro y oscuro
+- **📊 Preview**: Antes de mover archivos, ves cuántos hay y de qué tipo
+- **⚠️ Advertencia de seguridad**: Si intentas organizar todo tu Drive, te avisa
+- **📁 Organización inteligente**: Categoría → Año → Mes → Extensión
 
 ---
 
-## 📝 Notas importantes
-
-⚠️ **Si recargas la página y no ves los cambios:**
-- Presiona `Ctrl + Shift + R` para forzar recarga sin caché
-- O abre en una pestaña de incógnito
-
-⚠️ **Para volver a ejecutar:**
-- Si el túnel se cae, solo ejecuta el Paso 7 nuevamente
-- Si quieres reiniciar todo, ejecuta desde el Paso 2
-
----
-
-## 📖 Guía de Uso
+## 📖 Cómo usar la aplicación
 
 ### 1. Pantalla Principal
 
-En la interfaz web encontrarás:
+- **Ruta de la carpeta**: Dónde están los archivos a organizar (ej: `/content/drive/MyDrive/Descargas`)
+  - Deja en blanco para organizar TODO tu Drive ⚠️
+- **Carpeta destino**: Dónde quieres que vayan (deja vacío para misma ubicación)
+- **Organizar por fecha**: Crea carpetas por año y mes ✅ Recomendado
+- **Organizar por extensión**: Crea subcarpetas por tipo de archivo ✅ Recomendado
+- **Detectar duplicados**: Encuentra archivos repetidos (más lento)
 
-- **Ruta de la carpeta**: Ingresa la ruta completa (ej: `/content/drive/MyDrive/Descargas`)
-- **Carpeta destino**: Opcional, dejar en blanco para organizar en la misma ubicación
-- **Criterio principal**: Elegir entre organizar por tipo, fecha o tamaño
-- **Organizar por fecha**: Checkbox para crear subcarpetas por año/mes
-- **Organizar por extensión**: Checkbox para crear subcarpetas por extensión dentro de cada mes
-- **Detectar duplicados**: Checkbox para identificar archivos duplicados (más lento)
+### 2. Proceso de organización
 
-### 2. Iniciar Organización
+1. **Haz clic en "Organizar Archivos"**
+2. **Revisa el preview** - te muestra:
+   - Cuántos archivos encontró
+   - Cuántos hay de cada categoría
+   - Cuánto espacio ocupan
+   - Cuántos duplicados hay (si activaste esa opción)
+3. **Confirma** haciendo clic en "Confirmar y Organizar"
+4. **Espera** la barra de progreso
+5. **¡Listo!** Verás los resultados
 
-1. Completa los campos del formulario
-2. Haz clic en "Organizar Archivos"
-3. Revisa la **vista previa** que muestra:
-   - Total de archivos encontrados
-   - Cantidad por categoría
-   - Número de duplicados detectados
-   - Espacio total a mover
-4. Confirma la organización haciendo clic en "Confirmar y Organizar"
-5. Espera a que el proceso termine (verás una barra de progreso)
+### 3. Después de organizar
 
-### 3. Ver Resultados
-
-Una vez completado, podrás:
-- Ver estadísticas en la pantalla de resultados
-- Descargar el reporte CSV
+Puedes:
 - Ver el reporte detallado en el navegador
+- Descargar el archivo CSV con todos los datos
+- Ver las estadísticas de cuánto moviste
 
 ---
 
-## 📁 Estructura de Carpetas Generada
+## 📁 Estructura de carpetas generada
 
-Al organizar por **tipo**, **fecha** y **extensión**, la estructura resultante será:
+Cuando organizas por **tipo**, **fecha** y **extensión**, queda así:
 
 ```
-Carpeta_Organizada/
+MiCarpeta_Organizada/
 ├── Documentos/
 │   ├── 2024/
 │   │   ├── Enero/
@@ -244,9 +270,6 @@ Carpeta_Organizada/
 │   │       │   └── documento.docx
 │   │       └── pdf/
 │   │           └── otro.pdf
-│   └── 2023/
-│       ├── Diciembre/
-│       └── Noviembre/
 ├── Imágenes/
 │   ├── 2024/
 │   │   └── Marzo/
@@ -254,10 +277,6 @@ Carpeta_Organizada/
 │   │       │   └── foto.jpg
 │   │       └── png/
 │   │           └── imagen.png
-│   └── 2023/
-│       └── Diciembre/
-│           └── jpg/
-│               └── otra_foto.jpg
 ├── Multimedia/
 │   └── 2024/
 │       └── Febrero/
@@ -269,14 +288,12 @@ Carpeta_Organizada/
             └── archivo.zip
 ```
 
-> **Nota:** Las subcarpetas de extensión solo se crean cuando hay archivos con esa extensión. Si no deseas organizar por extensión, desmarca la opción "Organizar por extensión".
-
 ---
 
-## 📊 Categorías de Archivos
+## 📊 Categorías de archivos
 
-| Categoría | Extensiones |
-|-----------|-------------|
+| Categoría | Extensiones incluidas |
+|-----------|----------------------|
 | **Documentos** | .pdf, .docx, .doc, .txt, .pptx, .xlsx, .csv |
 | **Imágenes** | .jpg, .jpeg, .png, .gif, .bmp, .svg, .webp |
 | **Multimedia** | .mp4, .mp3, .avi, .mov, .wav, .mkv |
@@ -284,121 +301,32 @@ Carpeta_Organizada/
 
 ---
 
-## 📄 Ejemplo de Reporte CSV
+## 🔧 Solución de problemas
 
-El archivo `reporte_organizacion.csv` contiene las siguientes columnas:
+### "La ruta no existe"
+- Verifica que montaste Drive (Paso 1)
+- Asegúrate de que la ruta empiece con `/content/drive/`
 
-```csv
-nombre_original,extension,categoria,tamaño_bytes,fecha_modificacion,ruta_destino,es_duplicado
-informe_anual.pdf,.pdf,documentos,1543200,2024-03-15 10:30:00,/ruta/destino/Documentos/2024/Marzo/informe_anual.pdf,No
-foto_vacaciones.jpg,.jpg,imagenes,2048560,2023-12-20 14:45:00,/ruta/destino/Imagenes/2023/Diciembre/foto_vacaciones.jpg,No
-presentacion.pptx,.pptx,documentos,4520000,2024-01-10 09:15:00,/ruta/destino/Documentos/2024/Enero/presentacion.pptx,Si
-cancion_favorita.mp3,.mp3,multimedia,5242880,2024-05-22 16:20:00,/ruta/destino/Multimedia/2024/Mayo/cancion_favorita.mp3,No
-```
+### "No se ve el modo oscuro"
+- Presiona `Ctrl + Shift + R` en tu navegador (fuerza recarga sin caché)
 
-### Columnas del CSV:
+### "El enlace no funciona"
+- Verifica que la celda del Paso 6 sigue corriendo
+- Si se detuvo, ejecútala de nuevo
 
-| Columna | Descripción |
-|---------|-------------|
-| `nombre_original` | Nombre del archivo antes de organizar |
-| `extension` | Extensión del archivo |
-| `categoria` | Categoría asignada (documentos, imagenes, multimedia, otros) |
-| `tamaño_bytes` | Tamaño del archivo en bytes |
-| `fecha_modificacion` | Fecha de última modificación (YYYY-MM-DD HH:MM:SS) |
-| `ruta_destino` | Ruta final donde fue movido el archivo |
-| `es_duplicado` | "Si" si es duplicado, "No" en caso contrario |
+### "No veo la URL"
+- Espera 10-15 segundos, a veces tarda
+- Si sigue sin salir, detén la celda (botón ■) y ejecútala otra vez
 
 ---
 
-## 🔍 Detección de Duplicados
+## 📝 Notas importantes
 
-El sistema detecta archivos duplicados calculando el **hash MD5** de cada archivo:
-
-- Archivos con el mismo contenido tienen el mismo hash
-- Los duplicados son marcados en el CSV pero **NO se eliminan**
-- Se reporta el espacio ocupado por duplicados
-
-Para archivos grandes (>500MB), se usa un hash parcial (inicio + final + tamaño) para optimizar el rendimiento.
+- ✅ Los archivos **nunca se eliminan**, solo se mueven
+- 🔄 Si hay archivos con el mismo nombre, se renombran automáticamente
+- ⏱️ La detección de duplicados puede ser lenta en carpetas grandes
+- 🌐 El enlace cambia cada vez que reinicias (es temporal)
 
 ---
 
-## 🏗️ Estructura del Proyecto
-
-```
-proyecto_drive_ordenado/
-├── app.py                  # Servidor Flask principal
-├── organizer.py            # Lógica de organización
-├── reporter.py             # Generación de reportes CSV
-├── duplicates.py           # Detección de duplicados
-├── requirements.txt        # Dependencias Python
-├── start.sh                # Script de inicio
-├── README.md               # Documentación
-├── templates/
-│   ├── index.html          # Página principal
-│   ├── result.html         # Pantalla de resultados
-│   └── report.html         # Vista del reporte
-└── static/
-    ├── style.css           # Estilos CSS
-    └── script.js           # JavaScript frontend
-```
-
----
-
-## ⚙️ API Endpoints
-
-| Endpoint | Método | Descripción |
-|----------|--------|-------------|
-| `/` | GET | Página principal con formulario |
-| `/preview` | POST | Obtiene preview de organización sin mover archivos |
-| `/organizar` | POST | Inicia el proceso de organización |
-| `/estado` | GET | Consulta el estado del proceso en curso |
-| `/resultados` | GET | Muestra los resultados del último proceso |
-| `/reporte` | GET | Vista detallada del reporte CSV |
-| `/descargar_reporte` | GET | Descarga el archivo CSV |
-| `/api/estadisticas` | GET | API JSON con estadísticas |
-
----
-
-## ⚠️ Notas Importantes
-
-1. **Los archivos originales nunca se eliminan**, solo se mueven a nuevas ubicaciones
-2. Si un archivo con el mismo nombre existe en destino, se renombra automáticamente (`archivo_1.pdf`, `archivo_2.pdf`, etc.)
-3. La detección de duplicados puede ser lenta en carpetas con muchos archivos grandes
-4. El túnel de trycloudflare es temporal y cambia cada vez que reinicias la aplicación
-
----
-
-## 🔧 Solución de Problemas
-
-### Error: "La ruta no existe"
-- Verifica que Google Drive esté montado correctamente
-- Asegúrate de que la ruta comience con `/content/drive/`
-
-### Error: "Permission denied" al mover archivos
-- Algunos archivos de sistema de Google Drive pueden tener restricciones
-- Los archivos afectados se reportan en el CSV con el error correspondiente
-
-### El túnel no se genera
-- Verifica que cloudflared se descargó correctamente
-- Ejecuta `chmod +x cloudflared-linux-amd64` manualmente
-- Intenta reiniciar el runtime de Colab
-
----
-
-## 📜 Licencia
-
-Proyecto académico desarrollado para fines educativos.
-
----
-
-## 🙏 Créditos
-
-Desarrollado como proyecto de programación en Python.
-
-- **Backend**: Python, Flask, pandas
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Tunneling**: Cloudflare Tunnel
-
----
-
-**¡Gracias por usar Drive Ordenado!** 📁✨
+**¡Listo! Ahora sí, a organizar esos archivos!** 📁✨
