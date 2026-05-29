@@ -88,6 +88,8 @@ Cuando ejecutas, verás un círculo girando ⏳ mientras procesa, y luego el res
 
 Ahora que sabes cómo usar Colab, elige una de estas dos formas:
 
+> 📓 **¿Ya tienes el notebook?** Ábrelo directamente aquí: [Abrir Drive Ordenado en Google Colab](https://colab.research.google.com/drive/1OGzdmn0oI6xBTDTMIrhMlePdjoW7Z4IK?authuser=2)
+
 ### ⚡ OPCIÓN 1: RÁPIDA (Recomendada)
 
 Perfecta si quieres empezar ya. Solo copia y pega:
