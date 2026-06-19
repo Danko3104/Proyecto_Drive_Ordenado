@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiador de Duplicados - Drive Ordenado</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📁%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.0">
+    <style>
+        .cleaner-container { padding: var(--spacing-lg); }
+        .cleaner-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); }
+        .cleaner-header h2 { margin: 0; }
+        .search-row { display: flex; gap: var(--spacing); margin-bottom: var(--spacing-lg); }
+        .search-row input { flex: 1; }
+        .resumen-bar { display: flex; gap: var(--spacing-lg); margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
+        .resumen-item { background: var(--color-card); border-radius: var(--radius); padding: var(--spacing) var(--spacing-md); text-align: center; flex: 1; min-width: 120px; box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); }
+        .resumen-value { font-size: 1.8rem; font-weight: 700; color: var(--color-primary); display: block; }
+        .resumen-label { font-size: 0.85rem; color: var(--color-text-light); }
+        .grupo-duplicado { background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius); margin-bottom: var(--spacing); overflow: hidden; }
+        .grupo-header { background: var(--color-bg); padding: var(--spacing-sm) var(--spacing); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-border); }
+        .grupo-nombre { font-weight: 600; color: var(--color-text); }
+        .grupo-hash { font-family: monospace; font-size: 0.8rem; color: var(--color-text-light); }
+        .archivo-item { display: flex; align-items: center; gap: var(--spacing); padding: var(--spacing-sm) var(--spacing); border-bottom: 1px solid var(--color-border); }
+        .archivo-item:last-child { border-bottom: none; }
+        .archivo-item.original { background: rgba(16, 185, 129, 0.1); }
+        .archivo-check { width: 20px; height: 20px; cursor: pointer; }
+        .archivo-info { flex: 1; min-width: 0; }
+        .archivo-ruta { font-size: 0.85rem; color: var(--color-text-light); word-break: break-all; }
+        .archivo-meta { font-size: 0.8rem; color: var(--color-text-light); display: flex; gap: var(--spacing); }
+        .archivo-badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+        .badge-original { background: rgba(16, 185, 129, 0.2); color: var(--color-success); }
+        .badge-copia { background: rgba(239, 68, 68, 0.15); color: var(--color-error); }
+        .espacio-contador { text-align: center; padding: var(--spacing); background: var(--color-bg); border-radius: var(--radius); margin: var(--spacing) 0; border: 1px solid var(--color-border); }
+        .espacio-contador span { font-size: 1.3rem; font-weight: 700; color: var(--color-warning); }
+        .acciones-finales { text-align: center; margin-top: var(--spacing-lg); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: var(--color-card); border-radius: var(--radius-lg); padding: var(--spacing-lg); max-width: 500px; width: 90%; text-align: center; }
+        .modal-content h3 { margin-bottom: var(--spacing); }
+        .modal-actions { display: flex; gap: var(--spacing); justify-content: center; margin-top: var(--spacing-lg); }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <button type="button" class="theme-toggle" id="themeToggle" title="Cambiar tema">🌙</button>
+            <div class="logo">
+                <span class="logo-icon">🗑️</span>
+                <h1>Limpiador de Duplicados</h1>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-link">← Volver al inicio</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>🧹 Eliminar archivos duplicados</h2>
+                </div>
+
+                <div class="cleaner-container">
+                    <div class="search-row">
+                        <input type="text" id="rutaEscanear" placeholder="Ruta a escanear (ej: /content/drive/MyDrive/Descargas)">
+                        <button class="btn btn-primary" onclick="escanearDuplicados()">🔍 Escanear</button>
+                    </div>
+
+                    <div id="progressScan" class="progress-section hidden">
+                        <div class="progress-header">
+                            <span class="progress-status">Escaneando...</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="scanProgressFill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-message">Analizando archivos en busca de duplicados...</div>
+                    </div>
+
+                    <div id="resumenSection" class="hidden">
+                        <div class="resumen-bar" id="resumenBar"></div>
+                    </div>
+
+                    <div id="resultadosSection" class="hidden">
+                        <div id="gruposContainer"></div>
+
+                        <div id="espacioContador" class="espacio-contador hidden">
+                            💾 <span id="espacioSeleccionado">0</span> MB seleccionados para eliminar
+                        </div>
+
+                        <div class="acciones-finales">
+                            <button class="btn btn-primary" id="btnEliminar" onclick="mostrarConfirmacion()" disabled>
+                                🗑️ Eliminar seleccionados
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="resultadoEliminacion" class="hidden">
+                        <div class="result-section" style="display:block; padding: var(--spacing-lg);">
+                            <div class="result-icon" style="font-size:3rem;">✅</div>
+                            <h3 class="result-title" style="color: var(--color-success);">¡Limpieza completada!</h3>
+                            <p class="result-message" id="mensajeEliminacion"></p>
+                            <button class="btn btn-secondary" onclick="resetLimpiador()">Escanear otra carpeta</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Drive Ordenado - Proyecto de Gestión de Archivos</p>
+            <p class="footer-authors">Mendoza Gomez Eleangie Valentina | Tavera Carreño Daniel José</p>
+        </footer>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>⚠️ ¿Estás seguro?</h3>
+            <p id="modalTexto">Esta acción eliminará archivos permanentemente.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="eliminarSeleccionados()">Sí, eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+
+        function inicializarTema() {
+            const temaGuardado = localStorage.getItem('tema');
+            if (temaGuardado) {
+                document.documentElement.setAttribute('data-theme', temaGuardado);
+                actualizarIconoTema(temaGuardado);
+            } else {
+                const prefiereOscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const tema = prefiereOscuro ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', tema);
+                actualizarIconoTema(tema);
+            }
+        }
+
+        function actualizarIconoTema(tema) {
+            if (themeToggle) themeToggle.textContent = tema === 'dark' ? '☀️' : '🌙';
+        }
+
+        function toggleTema() {
+            const html = document.documentElement;
+            const temaActual = html.getAttribute('data-theme');
+            const nuevoTema = temaActual === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', nuevoTema);
+            localStorage.setItem('tema', nuevoTema);
+            actualizarIconoTema(nuevoTema);
+        }
+
+        if (themeToggle) themeToggle.addEventListener('click', toggleTema);
+        inicializarTema();
+
+        let gruposData = [];
+        let archivosAEliminar = [];
+
+        function mostrarSeccion(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function ocultarSeccion(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+
+        async function escanearDuplicados() {
+            const ruta = document.getElementById('rutaEscanear').value.trim();
+            if (!ruta) { alert('Ingresa una ruta válida'); return; }
+
+            ocultarSeccion('resumenSection');
+            ocultarSeccion('resultadosSection');
+            ocultarSeccion('resultadoEliminacion');
+            mostrarSeccion('progressScan');
+
+            try {
+                const resp = await fetch('/limpiador/escanear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ruta })
+                });
+                const data = await resp.json();
+
+                ocultarSeccion('progressScan');
+
+                if (!resp.ok) { alert('Error: ' + data.error); return; }
+
+                if (data.total_grupos === 0) {
+                    alert('✅ No se encontraron archivos duplicados en esta carpeta.');
+                    return;
+                }
+
+                gruposData = data.grupos || [];
+                mostrarResumen(data);
+                mostrarGrupos(gruposData);
+                mostrarSeccion('resumenSection');
+                mostrarSeccion('resultadosSection');
+            } catch (e) {
+                ocultarSeccion('progressScan');
+                alert('Error: ' + e.message);
+            }
+        }
+
+        function mostrarResumen(data) {
+            const bar = document.getElementById('resumenBar');
+            bar.innerHTML = `
+                <div class="resumen-item"><span class="resumen-value">${data.total_grupos}</span><span class="resumen-label">Grupos encontrados</span></div>
+                <div class="resumen-item"><span class="resumen-value">${data.total_archivos}</span><span class="resumen-label">Archivos duplicados</span></div>
+                <div class="resumen-item"><span class="resumen-value">${data.espacio_mb} MB</span><span class="resumen-label">Espacio ocupado</span></div>
+            `;
+        }
+
+        function mostrarGrupos(grupos) {
+            const container = document.getElementById('gruposContainer');
+            container.innerHTML = '';
+            archivosAEliminar = [];
+
+            grupos.forEach((grupo, gIdx) => {
+                const div = document.createElement('div');
+                div.className = 'grupo-duplicado';
+
+                const nombres = grupo.archivos.length > 0 ? grupo.archivos.map(a => a.nombre).filter(Boolean) : [];
+                const nombreGrupo = nombres.length > 0 ? nombres[0] : 'Archivo';
+
+                div.innerHTML = `
+                    <div class="grupo-header">
+                        <span class="grupo-nombre">📄 ${nombreGrupo}</span>
+                        <span class="grupo-hash">Hash: ${grupo.hash}</span>
+                    </div>
+                `;
+
+                if (grupo.archivos.length === 0) {
+                    const item = document.createElement('div');
+                    item.className = 'archivo-item';
+                    item.innerHTML = '<span style="color:var(--color-text-light);padding:var(--spacing);">No hay información detallada disponible</span>';
+                    div.appendChild(item);
+                } else {
+                    grupo.archivos.forEach((archivo, aIdx) => {
+                        const item = document.createElement('div');
+                        const esOriginal = aIdx === 0;
+                        item.className = 'archivo-item' + (esOriginal ? ' original' : '');
+
+                        const checkboxId = `chk_${gIdx}_${aIdx}`;
+                        const checkedAttr = esOriginal ? '' : 'checked';
+
+                        item.innerHTML = `
+                            ${esOriginal ? '<span style="color:var(--color-success);font-weight:600;min-width:30px;">⭐</span>' : `<input type="checkbox" class="archivo-check" id="${checkboxId}" data-grupo="${gIdx}" data-indice="${aIdx}" ${checkedAttr} onchange="actualizarEspacio()">`}
+                            <div class="archivo-info">
+                                ${archivo.ruta ? `<div class="archivo-ruta">${archivo.ruta}</div>` : `<div class="archivo-ruta" style="font-style:italic;">${grupo.archivos.map(a => a.nombre).filter(Boolean)[0] || 'Archivo'}</div>`}
+                                <div class="archivo-meta">
+                                    ${archivo.tamaño_mb ? `<span>${archivo.tamaño_mb} MB</span>` : ''}
+                                    ${archivo.fecha_modificacion ? `<span>${archivo.fecha_modificacion}</span>` : ''}
+                                    <span class="archivo-badge ${esOriginal ? 'badge-original' : 'badge-copia'}">${esOriginal ? '⭐ Original (se conserva)' : '📋 Copia'}</span>
+                                </div>
+                            </div>
+                        `;
+                        div.appendChild(item);
+                    });
+                }
+
+                container.appendChild(div);
+            });
+
+            actualizarEspacio();
+        }
+
+        function actualizarEspacio() {
+            const checkboxes = document.querySelectorAll('.archivo-check:checked');
+            const contador = document.getElementById('espacioContador');
+            const btnEliminar = document.getElementById('btnEliminar');
+
+            archivosAEliminar = [];
+            checkboxes.forEach(cb => {
+                const grupo = gruposData[parseInt(cb.dataset.grupo)];
+                if (grupo && grupo.archivos[parseInt(cb.dataset.indice)]) {
+                    archivosAEliminar.push(grupo.archivos[parseInt(cb.dataset.indice)].ruta || '');
+                }
+            });
+
+            if (checkboxes.length > 0) {
+                contador.classList.remove('hidden');
+                document.getElementById('espacioSeleccionado').textContent = archivosAEliminar.length;
+                btnEliminar.disabled = false;
+            } else {
+                contador.classList.add('hidden');
+                btnEliminar.disabled = true;
+            }
+        }
+
+        function mostrarConfirmacion() {
+            if (archivosAEliminar.length === 0) return;
+            document.getElementById('modalTexto').textContent = `Esta acción eliminará ${archivosAEliminar.length} archivos duplicados permanentemente.`;
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function cerrarModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        async function eliminarSeleccionados() {
+            cerrarModal();
+            if (archivosAEliminar.length === 0) return;
+
+            try {
+                const resp = await fetch('/limpiador/eliminar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rutas: archivosAEliminar })
+                });
+                const data = await resp.json();
+
+                ocultarSeccion('resultadosSection');
+
+                if (!resp.ok) { alert('Error: ' + data.error); return; }
+
+                const res = data.resultado;
+                document.getElementById('mensajeEliminacion').textContent =
+                    `✅ ${res.total_eliminados} archivos eliminados (${res.espacio_liberado_mb} MB liberados)${res.fallidos.length > 0 ? `. ${res.fallidos.length} archivos no pudieron eliminarse.` : ''}`;
+                mostrarSeccion('resultadoEliminacion');
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        function resetLimpiador() {
+            ocultarSeccion('resumenSection');
+            ocultarSeccion('resultadosSection');
+            ocultarSeccion('resultadoEliminacion');
+            document.getElementById('rutaEscanear').value = '';
+            gruposData = [];
+            archivosAEliminar = [];
+        }
+    </script>
+</body>
+</html>

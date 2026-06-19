@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renombrado Masivo - Drive Ordenado</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📁%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.0">
+    <style>
+        .regla-item { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-xs) 0; }
+        .tabla-renombrar { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .tabla-renombrar th, .tabla-renombrar td { padding: var(--spacing-sm); text-align: left; border-bottom: 1px solid var(--color-border); }
+        .tabla-renombrar th { background: var(--color-bg); font-weight: 600; }
+        .no-cambia { color: var(--color-text-light); font-style: italic; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <button type="button" class="theme-toggle" id="themeToggle" title="Cambiar tema">🌙</button>
+            <div class="logo">
+                <span class="logo-icon">✏️</span>
+                <h1>Renombrado Masivo</h1>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-link">← Volver al inicio</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>✏️ Renombrar múltiples archivos</h2>
+                </div>
+                <div style="padding: var(--spacing-lg);">
+                    <div style="display:flex; gap:var(--spacing); margin-bottom:var(--spacing-lg);">
+                        <input type="text" id="rutaRenombrar" placeholder="Ruta de la carpeta" style="flex:1;">
+                        <button class="btn btn-primary" onclick="previsualizarRenombrado()">🔍 Previsualizar</button>
+                    </div>
+
+                    <div style="margin-bottom:var(--spacing-lg);">
+                        <p style="font-weight:600; margin-bottom:var(--spacing-sm);">Reglas a aplicar:</p>
+                        <div class="regla-item"><label><input type="checkbox" class="regla-chk" value="minusculas"> Convertir a minúsculas</label></div>
+                        <div class="regla-item"><label><input type="checkbox" class="regla-chk" value="sin_espacios"> Reemplazar espacios por guiones bajos</label></div>
+                        <div class="regla-item"><label><input type="checkbox" class="regla-chk" value="sin_acentos"> Quitar acentos</label></div>
+                        <div class="regla-item"><label><input type="checkbox" class="regla-chk" value="agregar_fecha_inicio"> Agregar fecha al inicio</label></div>
+                        <div class="regla-item"><label><input type="checkbox" class="regla-chk" value="agregar_fecha_fin"> Agregar fecha al final</label></div>
+                        <div class="regla-item"><label><input type="checkbox" class="regla-chk" value="quitar_caracteres_especiales"> Quitar caracteres especiales</label></div>
+                    </div>
+
+                    <div id="renombrarProgress" class="hidden" style="margin-bottom:var(--spacing);">
+                        <div class="progress-header"><span class="progress-status">Procesando...</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:50%;"></div></div>
+                    </div>
+
+                    <div id="renombrarPreview" class="hidden">
+                        <p style="margin-bottom:var(--spacing-sm); font-weight:600;" id="renombrarCount"></p>
+                        <div style="max-height:400px; overflow-y:auto; border:1px solid var(--color-border); border-radius:var(--radius); margin-bottom:var(--spacing);">
+                            <table class="tabla-renombrar">
+                                <thead><tr><th>#</th><th>Nombre actual</th><th>Nombre nuevo</th></tr></thead>
+                                <tbody id="renombrarTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div style="text-align:center;">
+                            <button class="btn btn-primary" id="btnAplicarRename" onclick="ejecutarRenombrado()" disabled>✅ Aplicar renombrado</button>
+                        </div>
+                    </div>
+
+                    <div id="renombrarResult" class="hidden" style="text-align:center; padding:var(--spacing-lg);">
+                        <div style="font-size:3rem;">✅</div>
+                        <h3 style="color:var(--color-success);">¡Renombrado completado!</h3>
+                        <p id="renombrarResultMsg" style="color:var(--color-text-light);"></p>
+                        <button class="btn btn-secondary" onclick="resetRenombrar()">Renombrar otra carpeta</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Drive Ordenado - Proyecto de Gestión de Archivos</p>
+            <p class="footer-authors">Mendoza Gomez Eleangie Valentina | Tavera Carreño Daniel José</p>
+        </footer>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        function initTheme() {
+            const t = localStorage.getItem('tema');
+            if (t) { document.documentElement.setAttribute('data-theme', t); if(themeToggle) themeToggle.textContent = t === 'dark' ? '☀️' : '🌙'; }
+            else { const d = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', d); if(themeToggle) themeToggle.textContent = d === 'dark' ? '☀️' : '🌙'; }
+        }
+        if (themeToggle) themeToggle.addEventListener('click', function() {
+            const h = document.documentElement; const a = h.getAttribute('data-theme'); const n = a === 'dark' ? 'light' : 'dark';
+            h.setAttribute('data-theme', n); localStorage.setItem('tema', n); themeToggle.textContent = n === 'dark' ? '☀️' : '🌙';
+        });
+        initTheme();
+
+        let previewResultados = [];
+
+        function mostrar(id) { document.getElementById(id).classList.remove('hidden'); }
+        function ocultar(id) { document.getElementById(id).classList.add('hidden'); }
+
+        async function previsualizarRenombrado() {
+            const ruta = document.getElementById('rutaRenombrar').value.trim();
+            if (!ruta) { alert('Ingresa una ruta'); return; }
+            const reglas = Array.from(document.querySelectorAll('.regla-chk:checked')).map(c => c.value);
+            if (reglas.length === 0) { alert('Selecciona al menos una regla'); return; }
+
+            ocultar('renombrarPreview'); ocultar('renombrarResult'); mostrar('renombrarProgress');
+
+            try {
+                const resp = await fetch('/renombrar/preview', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ruta, reglas})
+                });
+                const data = await resp.json();
+                ocultar('renombrarProgress');
+                if (!resp.ok) { alert('Error: ' + data.error); return; }
+
+                previewResultados = data.resultados || [];
+                document.getElementById('renombrarCount').textContent =
+                    `📊 ${data.total_archivos} archivos encontrados - ${data.total_cambian} cambiarán de nombre`;
+
+                const tbody = document.getElementById('renombrarTableBody');
+                tbody.innerHTML = '';
+                previewResultados.forEach((r, i) => {
+                    const tr = document.createElement('tr');
+                    if (!r.cambiara) tr.className = 'no-cambia';
+                    tr.innerHTML = `
+                        <td>${i + 1}</td>
+                        <td>${r.nombre_original}</td>
+                        <td>${r.cambiara ? r.nombre_nuevo : '<em>(sin cambios)</em>'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('btnAplicarRename').disabled = data.total_cambian === 0;
+                mostrar('renombrarPreview');
+            } catch (e) { ocultar('renombrarProgress'); alert('Error: ' + e.message); }
+        }
+
+        async function ejecutarRenombrado() {
+            const cambiantes = previewResultados.filter(r => r.cambiara);
+            if (cambiantes.length === 0) return;
+            if (!confirm(`¿Renombrar ${cambiantes.length} archivos? Esta acción no se puede deshacer fácilmente.`)) return;
+
+            ocultar('renombrarPreview');
+            mostrar('renombrarProgress');
+            document.querySelector('#renombrarProgress .progress-message').textContent = 'Renombrando archivos...';
+
+            try {
+                const resp = await fetch('/renombrar/ejecutar', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({archivos: previewResultados})
+                });
+                const data = await resp.json();
+                ocultar('renombrarProgress');
+                if (!resp.ok) { alert('Error: ' + data.error); return; }
+
+                const r = data.resultado;
+                document.getElementById('renombrarResultMsg').textContent =
+                    `✅ ${r.total_exitosos} archivos renombrados${r.total_fallidos > 0 ? ` (${r.total_fallidos} fallos)` : ''}`;
+                mostrar('renombrarResult');
+            } catch (e) { ocultar('renombrarProgress'); alert('Error: ' + e.message); }
+        }
+
+        function resetRenombrar() {
+            ocultar('renombrarPreview'); ocultar('renombrarResult');
+            document.getElementById('rutaRenombrar').value = '';
+            previewResultados = [];
+        }
+    </script>
+</body>
+</html>

@@ -32,10 +32,16 @@
                             <span class="label-icon">📂</span>
                             Ruta de la carpeta a organizar
                         </label>
-                        <input type="text"
-                               id="ruta_origen"
-                               name="ruta_origen"
-                               placeholder="Déjalo vacío para organizar todo tu Drive o escribe una ruta específica">
+                        <div style="display: flex; gap: var(--spacing-xs);">
+                            <input type="text"
+                                   id="ruta_origen"
+                                   name="ruta_origen"
+                                   placeholder="Déjalo vacío para organizar todo tu Drive o escribe una ruta específica"
+                                   style="flex: 1;">
+                            <button type="button" class="btn btn-outline" onclick="abrirExplorador('ruta_origen')" title="Explorar carpetas" style="white-space: nowrap; padding: var(--spacing-sm);">
+                                📂 Explorar
+                            </button>
+                        </div>
                         <span class="help-text">Ejemplo: /content/drive/MyDrive/Descargas</span>
 
                         <div id="securityWarning" class="security-warning hidden">
@@ -56,10 +62,16 @@
                             <span class="label-icon">📁</span>
                             Carpeta destino (opcional)
                         </label>
-                        <input type="text"
-                               id="ruta_destino"
-                               name="ruta_destino"
-                               placeholder="Dejar en blanco para usar la misma ruta origen">
+                        <div style="display: flex; gap: var(--spacing-xs);">
+                            <input type="text"
+                                   id="ruta_destino"
+                                   name="ruta_destino"
+                                   placeholder="Dejar en blanco para usar la misma ruta origen"
+                                   style="flex: 1;">
+                            <button type="button" class="btn btn-outline" onclick="abrirExplorador('ruta_destino')" title="Explorar carpetas" style="white-space: nowrap; padding: var(--spacing-sm);">
+                                📂 Explorar
+                            </button>
+                        </div>
                         <span class="help-text">Si se deja vacío, se organizará en la misma carpeta origen</span>
                     </div>
 
@@ -136,6 +148,232 @@
                             <span class="btn-icon">🚀</span>
                             Organizar Archivos
                         </button>
+                    </div>
+
+                    <div class="info-box" style="margin-top: var(--spacing-lg); cursor: pointer;" onclick="toggleCategoriasSection()">
+                        <span class="info-icon">🏷️</span>
+                        <div class="info-content">
+                            <strong>🏷️ Personalizar categorías</strong>
+                            <p style="font-size:0.9rem;color:var(--color-text-light);margin:0;">Define tus propias categorías y extensiones de archivos</p>
+                        </div>
+                    </div>
+
+                    <div id="categoriasSection" class="hidden" style="padding: var(--spacing);">
+                        <div id="categoriasLista" style="margin-bottom:var(--spacing);"></div>
+                        <div style="display:flex; gap:var(--spacing-sm); justify-content:center; flex-wrap:wrap;">
+                            <button class="btn btn-secondary" onclick="agregarCategoriaVacia()">+ Agregar categoría</button>
+                            <button class="btn btn-primary" onclick="guardarCategorias()">💾 Guardar cambios</button>
+                            <button class="btn btn-outline" onclick="resetearCategorias()">↩️ Restaurar por defecto</button>
+                        </div>
+                        <p id="categoriasMsg" style="text-align:center; margin-top:var(--spacing-sm); font-size:0.9rem; color:var(--color-success);" class="hidden"></p>
+                    </div>
+
+                    <div class="info-box" style="margin-top: var(--spacing-lg); cursor: pointer;" onclick="toggleAnalisisSection()">
+                        <span class="info-icon">📊</span>
+                        <div class="info-content">
+                            <strong>📊 Analizar carpeta</strong>
+                            <p style="font-size:0.9rem;color:var(--color-text-light);margin:0;">Estadísticas instantáneas, top 10 archivos pesados y más</p>
+                        </div>
+                    </div>
+
+                    <div id="analisisSection" class="hidden" style="padding: var(--spacing);">
+                        <div class="form-group">
+                            <label>Ruta a analizar</label>
+                            <div style="display: flex; gap: var(--spacing-xs);">
+                                <input type="text" id="analisisRuta" placeholder="/content/drive/MyDrive" style="flex:1;">
+                                <button type="button" class="btn btn-outline" onclick="abrirExplorador('analisisRuta')" title="Explorar" style="white-space:nowrap; padding:var(--spacing-sm);">📂</button>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="analizarCarpeta()">
+                                <span class="btn-icon">📊</span>
+                                Analizar ahora
+                            </button>
+                        </div>
+
+                        <div id="analisisProgress" class="hidden" style="margin-top:var(--spacing);">
+                            <div class="progress-header"><span class="progress-status">Analizando...</span></div>
+                            <div class="progress-bar"><div class="progress-fill" id="analisisProgressFill" style="width:50%;"></div></div>
+                        </div>
+
+                        <div id="analisisResultados" class="hidden" style="margin-top:var(--spacing);">
+                            <div class="stats-grid" id="analisisCards" style="margin-bottom:var(--spacing);"></div>
+                            <div class="section" id="analisisTop10" style="padding:var(--spacing);">
+                                <h4 class="section-title">🏆 Top 10 archivos más pesados</h4>
+                                <div style="max-height:300px; overflow-y:auto; border:1px solid var(--color-border); border-radius:var(--radius);">
+                                    <table class="data-table">
+                                        <thead><tr><th>#</th><th>Nombre</th><th>Tamaño</th><th>Categoría</th></tr></thead>
+                                        <tbody id="analisisTopBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="section" id="analisisDatos" style="padding:var(--spacing);"></div>
+                        </div>
+                    </div>
+
+                    <div class="info-box" style="margin-top: var(--spacing-lg); cursor: pointer;" onclick="toggleUploadSection()">
+                        <span class="info-icon">📤</span>
+                        <div class="info-content">
+                            <strong>📤 Subir archivos desde tu PC</strong>
+                            <p style="font-size:0.9rem;color:var(--color-text-light);margin:0;">Sube archivos o carpetas a Drive y organízalos automáticamente</p>
+                        </div>
+                    </div>
+
+                    <div id="uploadSection" class="hidden" style="padding: var(--spacing);">
+                        <!-- Drop zone -->
+                        <div id="dropZone" style="border: 2px dashed var(--color-primary); border-radius: var(--radius-lg); padding: var(--spacing-xl); text-align: center; cursor: pointer; transition: var(--transition); margin-bottom: var(--spacing); background: var(--color-bg);"
+                             ondragover="event.preventDefault(); this.style.borderColor = 'var(--color-success)'; this.style.background = 'rgba(16,185,129,0.1)';"
+                             ondragleave="this.style.borderColor = 'var(--color-primary)'; this.style.background = 'var(--color-bg)';"
+                             ondrop="event.preventDefault(); manejarDrop(event); this.style.borderColor = 'var(--color-primary)'; this.style.background = 'var(--color-bg)';"
+                             onclick="document.getElementById('fileInput').click();">
+                            <div style="font-size:3rem; margin-bottom:var(--spacing);">📤</div>
+                            <p style="font-weight:600; color:var(--color-text);">Arrastra archivos o carpetas aquí</p>
+                            <p style="font-size:0.85rem; color:var(--color-text-light);">o haz clic para seleccionar</p>
+                        </div>
+
+                        <!-- Inputs ocultos -->
+                        <input type="file" id="fileInput" multiple style="display:none;" onchange="manejarSeleccionArchivos(event)">
+                        <input type="file" id="folderInput" webkitdirectory style="display:none;" onchange="manejarSeleccionArchivos(event)">
+
+                        <div style="display:flex; gap:var(--spacing-sm); justify-content:center; margin-bottom:var(--spacing);">
+                            <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click();">📄 Seleccionar archivos</button>
+                            <button class="btn btn-secondary" onclick="document.getElementById('folderInput').click();">📁 Seleccionar carpeta</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ruta destino en Drive</label>
+                            <div style="display: flex; gap: var(--spacing-xs);">
+                                <input type="text" id="uploadRuta" placeholder="/content/drive/MyDrive" style="flex:1;">
+                                <button type="button" class="btn btn-outline" onclick="abrirExplorador('uploadRuta')" title="Explorar" style="white-space:nowrap; padding:var(--spacing-sm);">📂</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="organizarAuto" checked>
+                                <span class="checkmark"></span>
+                                <span class="checkbox-text">
+                                    <strong>Organizar automáticamente después de subir</strong>
+                                    <span class="checkbox-description">Los archivos se clasificarán por tipo y fecha</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div id="uploadLista" class="hidden" style="margin-bottom:var(--spacing);">
+                            <p style="font-weight:600; margin-bottom:var(--spacing-sm);" id="uploadCount">0 archivos seleccionados</p>
+                            <div id="uploadItems" style="max-height:200px; overflow-y:auto; border:1px solid var(--color-border); border-radius:var(--radius);"></div>
+                        </div>
+
+                        <!-- Barra de progreso subida -->
+                        <div id="uploadProgress" class="hidden" style="margin-bottom:var(--spacing);">
+                            <div class="progress-header">
+                                <span class="progress-status">Subiendo archivos...</span>
+                                <span class="progress-percentage" id="uploadProgressPct">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="uploadProgressFill" style="width:0%;"></div>
+                            </div>
+                            <div class="progress-message" id="uploadProgressMsg">Preparando archivos...</div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn btn-primary" onclick="subirArchivos()">
+                                <span class="btn-icon">📤</span>
+                                Subir y organizar
+                            </button>
+                        </div>
+
+                        <div id="uploadResult" class="hidden" style="margin-top:var(--spacing); padding:var(--spacing); background:rgba(16,185,129,0.1); border-radius:var(--radius); text-align:center;">
+                            <p id="uploadResultMsg" style="font-weight:600;"></p>
+                        </div>
+                    </div>
+
+                    <div class="info-box" style="margin-top: var(--spacing-lg); cursor: pointer;" onclick="toggleSearchSection()">
+                        <span class="info-icon">🔍</span>
+                        <div class="info-content">
+                            <strong>🔍 Buscar archivos</strong>
+                            <p style="font-size:0.9rem;color:var(--color-text-light);margin:0;">Buscar archivos sin necesidad de organizarlos</p>
+                        </div>
+                    </div>
+
+                    <div id="searchSection" class="hidden" style="padding: var(--spacing);">
+                        <div class="form-group">
+                            <label>Ruta de búsqueda</label>
+                            <input type="text" id="searchRuta" placeholder="/content/drive/MyDrive">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre (opcional)</label>
+                                <input type="text" id="searchNombre" placeholder="Filtrar por nombre">
+                            </div>
+                            <div class="form-group">
+                                <label>Extensión (opcional)</label>
+                                <input type="text" id="searchExtension" placeholder="ej: pdf, jpg">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Categoría</label>
+                                <select id="searchCategoria">
+                                    <option value="">Todas las categorías</option>
+                                    <option value="documentos">Documentos</option>
+                                    <option value="imagenes">Imágenes</option>
+                                    <option value="multimedia">Multimedia</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tamaño mínimo (MB)</label>
+                                <input type="number" id="searchSizeMin" placeholder="0" min="0" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label>Tamaño máximo (MB)</label>
+                                <input type="number" id="searchSizeMax" placeholder="1000" min="0" step="0.1">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-primary" onclick="buscarArchivos()">
+                                <span class="btn-icon">🔍</span>
+                                Buscar
+                            </button>
+                        </div>
+
+                        <div id="searchResults" class="hidden" style="margin-top: var(--spacing);">
+                            <p style="margin-bottom: var(--spacing-sm); font-weight: 600;" id="searchCount">0 archivos encontrados</p>
+                            <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: var(--radius);">
+                                <table class="data-table" id="searchTable">
+                                    <thead>
+                                        <tr>
+                                            <th onclick="ordenarTablaBusqueda(0)">Nombre ↕</th>
+                                            <th onclick="ordenarTablaBusqueda(1)">Categoría ↕</th>
+                                            <th onclick="ordenarTablaBusqueda(2)">Extensión ↕</th>
+                                            <th onclick="ordenarTablaBusqueda(3)">Tamaño ↕</th>
+                                            <th onclick="ordenarTablaBusqueda(4)">Fecha ↕</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="searchTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: var(--spacing); padding-top: var(--spacing); border-top: 1px solid var(--color-border);">
+                        <a href="/limpiador" class="btn btn-outline" style="margin: 0 var(--spacing-xs);">
+                            <span class="btn-icon">🗑️</span>
+                            Limpiador Duplicados
+                        </a>
+                        <a href="/basura" class="btn btn-outline" style="margin: 0 var(--spacing-xs);">
+                            <span class="btn-icon">🧹</span>
+                            Limpiador Basura
+                        </a>
+                        <a href="/renombrar" class="btn btn-outline" style="margin: 0 var(--spacing-xs);">
+                            <span class="btn-icon">✏️</span>
+                            Renombrar
+                        </a>
+                        <a href="/historial" class="btn btn-outline" style="margin: 0 var(--spacing-xs);">
+                            <span class="btn-icon">📜</span>
+                            Historial
+                        </a>
                     </div>
                 </form>
 
@@ -238,5 +476,112 @@
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}?v=2.0"></script>
+
+    <!-- Modal del explorador de carpetas -->
+    <div id="exploradorModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000;">
+        <div style="background:var(--color-card); border-radius:var(--radius-lg); padding:var(--spacing-lg); max-width:600px; width:95%; max-height:80vh; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--spacing);">
+                <h3 style="margin:0;">📂 Explorador de carpetas</h3>
+                <button onclick="cerrarExplorador()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--color-text-light);">✕</button>
+            </div>
+            <div style="background:var(--color-bg); border-radius:var(--radius); padding:var(--spacing-sm) var(--spacing); margin-bottom:var(--spacing); font-size:0.9rem; word-break:break-all; font-family:monospace;" id="exploradorRutaActual">
+                /content/drive/MyDrive
+            </div>
+            <div style="flex:1; overflow-y:auto; border:1px solid var(--color-border); border-radius:var(--radius);" id="exploradorLista">
+                <div style="padding:var(--spacing); text-align:center; color:var(--color-text-light);">Cargando...</div>
+            </div>
+            <div style="display:flex; gap:var(--spacing); margin-top:var(--spacing);">
+                <button class="btn btn-secondary" onclick="navegarExploradorAtras()" id="exploradorBtnAtras" disabled>⬆ Subir</button>
+                <button class="btn btn-primary" onclick="seleccionarCarpetaExplorador()" id="exploradorBtnSeleccionar" style="margin-left:auto;">✅ Seleccionar esta carpeta</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Explorador de carpetas
+        let exploradorInputId = '';
+        let exploradorRutaActual = '/content/drive/MyDrive';
+
+        function abrirExplorador(inputId) {
+            exploradorInputId = inputId;
+            exploradorRutaActual = '/content/drive/MyDrive';
+            document.getElementById('exploradorModal').style.display = 'flex';
+            cargarExplorador(exploradorRutaActual);
+        }
+
+        function cerrarExplorador() {
+            document.getElementById('exploradorModal').style.display = 'none';
+        }
+
+        async function cargarExplorador(ruta) {
+            const lista = document.getElementById('exploradorLista');
+            const rutaActual = document.getElementById('exploradorRutaActual');
+            const btnAtras = document.getElementById('exploradorBtnAtras');
+
+            rutaActual.textContent = ruta;
+            exploradorRutaActual = ruta;
+            lista.innerHTML = '<div style="padding:var(--spacing); text-align:center; color:var(--color-text-light);">Cargando...</div>';
+
+            try {
+                const resp = await fetch('/explorador?ruta=' + encodeURIComponent(ruta));
+                const data = await resp.json();
+
+                btnAtras.disabled = !data.ruta_padre;
+
+                lista.innerHTML = '';
+                if (data.error) {
+                    lista.innerHTML = '<div style="padding:var(--spacing); text-align:center; color:var(--color-error);">Error: ' + data.error + '</div>';
+                    return;
+                }
+
+                if (data.carpetas.length === 0) {
+                    lista.innerHTML = '<div style="padding:var(--spacing-lg); text-align:center; color:var(--color-text-light);">📭 Esta carpeta está vacía</div>';
+                    return;
+                }
+
+                data.carpetas.forEach(c => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'padding:var(--spacing-sm) var(--spacing); cursor:pointer; border-bottom:1px solid var(--color-border); display:flex; align-items:center; gap:var(--spacing-sm); transition:background 0.2s;';
+                    div.onmouseover = () => div.style.background = 'var(--color-bg)';
+                    div.onmouseout = () => div.style.background = 'transparent';
+                    div.ondblclick = () => navegarExplorador(c.ruta);
+                    div.onclick = () => {
+                        document.querySelectorAll('#exploradorLista > div').forEach(d => d.style.background = 'transparent');
+                        div.style.background = 'var(--color-primary)';
+                        div.style.color = 'white';
+                        exploradorRutaActual = c.ruta;
+                    };
+                    div.innerHTML = `<span style="font-size:1.2rem;">📁</span><span>${c.nombre}</span>`;
+                    lista.appendChild(div);
+                });
+            } catch (e) {
+                lista.innerHTML = '<div style="padding:var(--spacing); text-align:center; color:var(--color-error);">Error: ' + e.message + '</div>';
+            }
+        }
+
+        async function navegarExplorador(ruta) {
+            await cargarExplorador(ruta);
+        }
+
+        async function navegarExploradorAtras() {
+            try {
+                const resp = await fetch('/explorador?ruta=' + encodeURIComponent(exploradorRutaActual));
+                const data = await resp.json();
+                if (data.ruta_padre) {
+                    await cargarExplorador(data.ruta_padre);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function seleccionarCarpetaExplorador() {
+            const input = document.getElementById(exploradorInputId);
+            if (input) {
+                input.value = exploradorRutaActual;
+            }
+            cerrarExplorador();
+        }
+    </script>
 </body>
 </html>

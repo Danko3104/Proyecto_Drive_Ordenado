@@ -37,8 +37,10 @@ def obtener_categoria(extension: str) -> str:
     Returns:
         Nombre de la categoría: 'documentos', 'imagenes', 'multimedia' u 'otros'
     """
+    from config import cargar_categorias
+    categorias = cargar_categorias()
     ext = extension.lower()
-    for categoria, extensiones in CATEGORIAS.items():
+    for categoria, extensiones in categorias.items():
         if categoria == 'otros':
             continue
         if ext in extensiones:

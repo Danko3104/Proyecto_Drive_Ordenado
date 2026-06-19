@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiador de Basura - Drive Ordenado</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📁%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.0">
+    <style>
+        .cat-group { background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius); margin-bottom: var(--spacing); overflow: hidden; }
+        .cat-header { background: var(--color-bg); padding: var(--spacing-sm) var(--spacing); display: flex; align-items: center; gap: var(--spacing); border-bottom: 1px solid var(--color-border); }
+        .cat-header label { margin:0; cursor:pointer; display:flex; align-items:center; gap:var(--spacing-sm); font-weight:600; }
+        .archivo-item { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-xs) var(--spacing); border-bottom: 1px solid var(--color-border); font-size: 0.9rem; }
+        .archivo-item:last-child { border-bottom: none; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <button type="button" class="theme-toggle" id="themeToggle" title="Cambiar tema">🌙</button>
+            <div class="logo">
+                <span class="logo-icon">🧹</span>
+                <h1>Limpiador de Basura</h1>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-link">← Volver al inicio</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>🧹 Eliminar archivos temporales y basura</h2>
+                </div>
+                <div style="padding: var(--spacing-lg);">
+                    <div style="display:flex; gap:var(--spacing); margin-bottom:var(--spacing-lg);">
+                        <input type="text" id="rutaBasura" placeholder="Ruta a escanear" style="flex:1;">
+                        <button class="btn btn-primary" onclick="escanearBasura()">🔍 Escanear</button>
+                    </div>
+
+                    <div id="basuraProgress" class="hidden" style="margin-bottom:var(--spacing);">
+                        <div class="progress-header"><span class="progress-status">Escaneando...</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:50%;"></div></div>
+                        <div class="progress-message">Buscando archivos basura...</div>
+                    </div>
+
+                    <div id="basuraResumen" class="hidden" style="margin-bottom:var(--spacing-lg);">
+                        <div style="display:flex; gap:var(--spacing-lg); flex-wrap:wrap;">
+                            <div class="resumen-item" style="background:var(--color-card); border-radius:var(--radius); padding:var(--spacing) var(--spacing-md); text-align:center; flex:1; min-width:120px; box-shadow:var(--shadow-sm); border:1px solid var(--color-border);">
+                                <span class="resumen-value" style="font-size:1.8rem; font-weight:700; color:var(--color-primary); display:block;" id="basuraTotal">0</span>
+                                <span class="resumen-label" style="font-size:0.85rem; color:var(--color-text-light);">Archivos basura</span>
+                            </div>
+                            <div class="resumen-item" style="background:var(--color-card); border-radius:var(--radius); padding:var(--spacing) var(--spacing-md); text-align:center; flex:1; min-width:120px; box-shadow:var(--shadow-sm); border:1px solid var(--color-border);">
+                                <span class="resumen-value" style="font-size:1.8rem; font-weight:700; color:var(--color-warning); display:block;" id="basuraMB">0</span>
+                                <span class="resumen-label" style="font-size:0.85rem; color:var(--color-text-light);">MB a liberar</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="basuraGrupos" class="hidden"></div>
+
+                    <div id="basuraActions" class="hidden" style="text-align:center; margin-top:var(--spacing-lg);">
+                        <button class="btn btn-primary" id="btnLimpiarBasura" onclick="limpiarBasura()" disabled>🗑️ Limpiar seleccionados</button>
+                    </div>
+
+                    <div id="basuraResult" class="hidden" style="text-align:center; padding:var(--spacing-lg);">
+                        <div style="font-size:3rem;">✅</div>
+                        <h3 style="color:var(--color-success);">¡Limpieza completada!</h3>
+                        <p id="basuraResultMsg" style="color:var(--color-text-light);"></p>
+                        <button class="btn btn-secondary" onclick="resetBasura()">Escanear otra carpeta</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Drive Ordenado - Proyecto de Gestión de Archivos</p>
+            <p class="footer-authors">Mendoza Gomez Eleangie Valentina | Tavera Carreño Daniel José</p>
+        </footer>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        function initTheme() {
+            const t = localStorage.getItem('tema');
+            if (t) { document.documentElement.setAttribute('data-theme', t); if(themeToggle) themeToggle.textContent = t === 'dark' ? '☀️' : '🌙'; }
+            else { const d = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', d); if(themeToggle) themeToggle.textContent = d === 'dark' ? '☀️' : '🌙'; }
+        }
+        if (themeToggle) themeToggle.addEventListener('click', function() {
+            const h = document.documentElement; const a = h.getAttribute('data-theme'); const n = a === 'dark' ? 'light' : 'dark';
+            h.setAttribute('data-theme', n); localStorage.setItem('tema', n); themeToggle.textContent = n === 'dark' ? '☀️' : '🌙';
+        });
+        initTheme();
+
+        let basuraData = [];
+        let basuraAEliminar = [];
+
+        function mostrar(id) { const e = document.getElementById(id); if(e) e.classList.remove('hidden'); }
+        function ocultar(id) { const e = document.getElementById(id); if(e) e.classList.add('hidden'); }
+
+        async function escanearBasura() {
+            const ruta = document.getElementById('rutaBasura').value.trim();
+            if (!ruta) { alert('Ingresa una ruta'); return; }
+            ocultar('basuraResumen'); ocultar('basuraGrupos'); ocultar('basuraActions'); ocultar('basuraResult');
+            mostrar('basuraProgress');
+
+            try {
+                const resp = await fetch('/basura/escanear', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ruta})
+                });
+                const data = await resp.json();
+                ocultar('basuraProgress');
+                if (!resp.ok) { alert('Error: ' + data.error); return; }
+
+                if (data.total_encontrados === 0) {
+                    alert('✅ No se encontraron archivos basura.');
+                    return;
+                }
+
+                basuraData = data;
+                document.getElementById('basuraTotal').textContent = data.total_encontrados;
+                document.getElementById('basuraMB').textContent = data.total_mb;
+                mostrar('basuraResumen');
+
+                const grupos = document.getElementById('basuraGrupos');
+                grupos.innerHTML = '';
+
+                for (const [cat, info] of Object.entries(data.por_categoria)) {
+                    const archivosCat = data.archivos.filter(a => a.categoria_basura === cat);
+                    const div = document.createElement('div');
+                    div.className = 'cat-group';
+                    div.innerHTML = `
+                        <div class="cat-header">
+                            <label><input type="checkbox" onchange="toggleCategoria(this, '${cat}')" checked><span>${cat}</span></label>
+                            <span style="margin-left:auto; font-size:0.85rem; color:var(--color-text-light);">${info.cantidad} archivos (${info.tamaño_mb} MB)</span>
+                        </div>
+                        <div id="cat_${cat.replace(/\s+/g,'_')}">
+                            ${archivosCat.map(a => `
+                                <div class="archivo-item">
+                                    <input type="checkbox" class="chk-basura" data-cat="${cat}" checked onchange="actualizarBtnBasura()">
+                                    <span>${a.nombre}</span>
+                                    <span style="margin-left:auto; color:var(--color-text-light); font-size:0.8rem;">${(a.tamaño_bytes / 1024 / 1024).toFixed(2)} MB</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    grupos.appendChild(div);
+                }
+
+                mostrar('basuraGrupos');
+                mostrar('basuraActions');
+                actualizarBtnBasura();
+            } catch (e) { ocultar('basuraProgress'); alert('Error: ' + e.message); }
+        }
+
+        function toggleCategoria(checkbox, categoria) {
+            const container = document.getElementById('cat_' + categoria.replace(/\s+/g,'_'));
+            const checks = container.querySelectorAll('.chk-basura');
+            checks.forEach(c => c.checked = checkbox.checked);
+            actualizarBtnBasura();
+        }
+
+        function actualizarBtnBasura() {
+            const checks = document.querySelectorAll('.chk-basura:checked');
+            document.getElementById('btnLimpiarBasura').disabled = checks.length === 0;
+            basuraAEliminar = Array.from(checks).map(c => {
+                const item = c.closest('.archivo-item');
+                const nombre = item.querySelector('span').textContent;
+                const archivo = basuraData.archivos.find(a => a.nombre === nombre);
+                return archivo ? archivo.ruta : '';
+            }).filter(Boolean);
+        }
+
+        async function limpiarBasura() {
+            if (basuraAEliminar.length === 0) return;
+            if (!confirm(`¿Eliminar ${basuraAEliminar.length} archivos basura?`)) return;
+
+            try {
+                const resp = await fetch('/basura/eliminar', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({rutas: basuraAEliminar})
+                });
+                const data = await resp.json();
+                ocultar('basuraResumen'); ocultar('basuraGrupos'); ocultar('basuraActions');
+                if (!resp.ok) { alert('Error: ' + data.error); return; }
+                const r = data.resultado;
+                document.getElementById('basuraResultMsg').textContent = `✅ ${r.total_eliminados} archivos eliminados (${r.espacio_liberado_mb} MB liberados)`;
+                mostrar('basuraResult');
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        function resetBasura() {
+            ocultar('basuraResumen'); ocultar('basuraGrupos'); ocultar('basuraActions'); ocultar('basuraResult');
+            document.getElementById('rutaBasura').value = '';
+            basuraData = []; basuraAEliminar = [];
+        }
+    </script>
+</body>
+</html>

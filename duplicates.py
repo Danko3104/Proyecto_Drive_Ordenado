@@ -261,3 +261,57 @@ def obtener_resumen_duplicados_para_reporte(archivos_marcados: List[Dict]) -> st
         lineas.append("")
 
     return "\n".join(lineas)
+
+
+def eliminar_archivos_seleccionados(rutas: List[str]) -> Dict:
+    """
+    Elimina una lista de archivos del sistema de archivos.
+
+    Args:
+        rutas: Lista de rutas absolutas de archivos a eliminar
+
+    Returns:
+        Diccionario con:
+            - eliminados: lista de rutas eliminadas exitosamente
+            - fallidos: lista de rutas que no se pudieron eliminar con su error
+            - espacio_liberado_mb: total de MB liberados
+            - total_eliminados: cantidad de archivos eliminados
+    """
+    resultado = {
+        'eliminados': [],
+        'fallidos': [],
+        'espacio_liberado_mb': 0,
+        'total_eliminados': 0
+    }
+
+    for ruta in rutas:
+        try:
+            if not os.path.exists(ruta):
+                resultado['fallidos'].append({
+                    'ruta': ruta,
+                    'error': 'El archivo no existe'
+                })
+                continue
+
+            if not os.path.isfile(ruta):
+                resultado['fallidos'].append({
+                    'ruta': ruta,
+                    'error': 'No es un archivo'
+                })
+                continue
+
+            tamaño = os.path.getsize(ruta)
+            os.remove(ruta)
+            resultado['eliminados'].append(ruta)
+            resultado['espacio_liberado_mb'] += tamaño / (1024 * 1024)
+            resultado['total_eliminados'] += 1
+
+        except Exception as e:
+            resultado['fallidos'].append({
+                'ruta': ruta,
+                'error': str(e)
+            })
+
+    resultado['espacio_liberado_mb'] = round(resultado['espacio_liberado_mb'], 2)
+
+    return resultado

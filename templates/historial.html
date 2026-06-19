@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial - Drive Ordenado</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📁%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.0">
+    <style>
+        .historial-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius); padding: var(--spacing); margin-bottom: var(--spacing-sm); }
+        .historial-card:hover { box-shadow: var(--shadow); }
+        .historial-fecha { font-size: 0.85rem; color: var(--color-text-light); }
+        .historial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--spacing-sm); margin-top: var(--spacing-sm); }
+        .historial-item { text-align: center; background: var(--color-bg); border-radius: var(--radius); padding: var(--spacing-sm); }
+        .historial-valor { font-size: 1.3rem; font-weight: 700; color: var(--color-primary); display: block; }
+        .historial-etiqueta { font-size: 0.8rem; color: var(--color-text-light); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <button type="button" class="theme-toggle" id="themeToggle" title="Cambiar tema">🌙</button>
+            <div class="logo">
+                <span class="logo-icon">📜</span>
+                <h1>Historial de Sesiones</h1>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-link">← Volver al inicio</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>📋 Organizaciones anteriores</h2>
+                </div>
+                <div style="padding: var(--spacing-lg);">
+                    <div style="display:flex; gap:var(--spacing-sm); align-items:center; margin-bottom:var(--spacing-lg);">
+                        <input type="text" id="historialRuta" value="/content/drive/MyDrive" style="flex:1;">
+                        <button class="btn btn-primary" onclick="cargarHistorial()">🔍 Cargar</button>
+                    </div>
+
+                    <div id="historialLoading" class="hidden" style="text-align:center; padding:var(--spacing-lg); color:var(--color-text-light);">
+                        <p>Cargando historial...</p>
+                    </div>
+
+                    <div id="historialEmpty" class="hidden" style="text-align:center; padding:var(--spacing-xl);">
+                        <div style="font-size:4rem; margin-bottom:var(--spacing);">📭</div>
+                        <h3 style="color:var(--color-text);">Aún no has organizado ninguna carpeta</h3>
+                        <p style="color:var(--color-text-light); margin-bottom:var(--spacing-lg);">Las sesiones de organización aparecerán aquí automáticamente.</p>
+                        <a href="/" class="btn btn-primary">Ir a organizar</a>
+                    </div>
+
+                    <div id="historialLista" class="hidden"></div>
+
+                    <div id="historialActions" class="hidden" style="text-align:center; margin-top:var(--spacing-lg);">
+                        <button class="btn btn-secondary" onclick="limpiarHistorial()">🗑️ Limpiar historial</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Drive Ordenado - Proyecto de Gestión de Archivos</p>
+            <p class="footer-authors">Mendoza Gomez Eleangie Valentina | Tavera Carreño Daniel José</p>
+        </footer>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+
+        function inicializarTema() {
+            const temaGuardado = localStorage.getItem('tema');
+            if (temaGuardado) {
+                document.documentElement.setAttribute('data-theme', temaGuardado);
+                if (themeToggle) themeToggle.textContent = temaGuardado === 'dark' ? '☀️' : '🌙';
+            } else {
+                const prefiereOscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const tema = prefiereOscuro ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', tema);
+                if (themeToggle) themeToggle.textContent = tema === 'dark' ? '☀️' : '🌙';
+            }
+        }
+
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                const html = document.documentElement;
+                const temaActual = html.getAttribute('data-theme');
+                const nuevoTema = temaActual === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', nuevoTema);
+                localStorage.setItem('tema', nuevoTema);
+                themeToggle.textContent = nuevoTema === 'dark' ? '☀️' : '🌙';
+            });
+        }
+
+        inicializarTema();
+        document.addEventListener('DOMContentLoaded', cargarHistorial);
+
+        function mostrar(id) { document.getElementById(id).classList.remove('hidden'); }
+        function ocultar(id) { document.getElementById(id).classList.add('hidden'); }
+
+        async function cargarHistorial() {
+            const ruta = document.getElementById('historialRuta').value.trim();
+            ocultar('historialEmpty');
+            ocultar('historialLista');
+            ocultar('historialActions');
+            mostrar('historialLoading');
+
+            try {
+                const resp = await fetch('/historial/datos?ruta=' + encodeURIComponent(ruta));
+                const data = await resp.json();
+                ocultar('historialLoading');
+
+                if (!resp.ok || !data.historial || data.historial.length === 0) {
+                    mostrar('historialEmpty');
+                    return;
+                }
+
+                const lista = document.getElementById('historialLista');
+                lista.innerHTML = '';
+
+                data.historial.forEach(h => {
+                    const card = document.createElement('div');
+                    card.className = 'historial-card';
+                    card.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:var(--color-text);">📂 ${h.ruta_origen.split('/').pop() || h.ruta_origen}</strong>
+                            <span class="historial-fecha">${h.fecha}</span>
+                        </div>
+                        <div class="historial-grid">
+                            <div class="historial-item"><span class="historial-valor">${h.total_archivos}</span><span class="historial-etiqueta">Archivos</span></div>
+                            <div class="historial-item"><span class="historial-valor">${h.tamaño_total_mb}</span><span class="historial-etiqueta">MB</span></div>
+                            <div class="historial-item"><span class="historial-valor">${h.duplicados_encontrados || 0}</span><span class="historial-etiqueta">Duplicados</span></div>
+                            <div class="historial-item"><span class="historial-valor">${h.errores || 0}</span><span class="historial-etiqueta">Errores</span></div>
+                        </div>
+                        <div style="font-size:0.85rem; color:var(--color-text-light); margin-top:var(--spacing-xs);">
+                            Criterio: <strong>${h.criterio || 'tipo'}</strong> | Ruta: <code>${h.ruta_origen}</code>
+                        </div>
+                    `;
+                    lista.appendChild(card);
+                });
+
+                mostrar('historialLista');
+                mostrar('historialActions');
+            } catch (e) {
+                ocultar('historialLoading');
+                mostrar('historialEmpty');
+                document.querySelector('#historialEmpty h3').textContent = 'Error al cargar';
+                document.querySelector('#historialEmpty p').textContent = e.message;
+            }
+        }
+
+        async function limpiarHistorial() {
+            if (!confirm('¿Estás seguro de limpiar todo el historial?')) return;
+            const ruta = document.getElementById('historialRuta').value.trim();
+            try {
+                const resp = await fetch('/historial/limpiar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ruta })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    ocultar('historialLista');
+                    ocultar('historialActions');
+                    mostrar('historialEmpty');
+                    document.querySelector('#historialEmpty h3').textContent = 'Historial limpiado';
+                    document.querySelector('#historialEmpty p').textContent = 'No hay sesiones registradas.';
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

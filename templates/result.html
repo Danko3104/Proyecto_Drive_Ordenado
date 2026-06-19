@@ -310,6 +310,16 @@
                     {% endif %}
                 </div>
 
+                <div class="section" style="background: rgba(245, 158, 11, 0.1); border: 2px solid var(--color-warning); border-radius: var(--radius); margin: var(--spacing-lg);">
+                    <div id="undoInfo" style="text-align: center; padding: var(--spacing);">
+                        <p style="font-weight: 600; color: var(--color-warning); margin-bottom: var(--spacing-sm);">⏪ Deshacer organización</p>
+                        <p style="font-size: 0.9rem; color: var(--color-text-light); margin-bottom: var(--spacing);" id="undoText">Verificando disponibilidad...</p>
+                        <button class="btn btn-secondary" id="btnUndo" onclick="mostrarModalUndo()" disabled style="border-color: var(--color-warning); color: var(--color-warning);">
+                            ⏪ Deshacer organización
+                        </button>
+                    </div>
+                </div>
+
                 <div class="card-footer">
                     <a href="/descargar_reporte" class="btn btn-primary">
                         <span class="btn-icon">⬇️</span>
@@ -326,6 +336,37 @@
                     <a href="/" class="btn btn-outline">
                         Organizar otra carpeta
                     </a>
+                </div>
+
+                <!-- Modal de confirmación deshacer -->
+                <div id="undoModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000;">
+                    <div class="modal-content" style="background:var(--color-card); border-radius:var(--radius-lg); padding:var(--spacing-lg); max-width:500px; width:90%; text-align:center;">
+                        <h3 style="margin-bottom:var(--spacing);">⚠️ ¿Estás seguro?</h3>
+                        <p id="undoModalText" style="color:var(--color-text-light); margin-bottom:var(--spacing);">Esta acción moverá los archivos de vuelta a su ubicación original y no se puede deshacer.</p>
+                        <div style="display:flex; gap:var(--spacing); justify-content:center; margin-top:var(--spacing-lg);">
+                            <button class="btn btn-secondary" onclick="cerrarModalUndo()">Cancelar</button>
+                            <button class="btn btn-primary" onclick="ejecutarUndo()" style="background:var(--color-warning);">Sí, deshacer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barra de progreso deshacer -->
+                <div id="undoProgress" style="display:none; padding:var(--spacing-lg); text-align:center;">
+                    <div class="progress-header">
+                        <span class="progress-status">Revirtiendo organización...</span>
+                    </div>
+                    <div class="progress-bar" style="margin-bottom:var(--spacing-sm);">
+                        <div class="progress-fill" id="undoProgressFill" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-message" id="undoProgressMsg">Moviendo archivos de vuelta...</div>
+                </div>
+
+                <!-- Resultado deshacer -->
+                <div id="undoResult" style="display:none; padding:var(--spacing-xl); text-align:center;">
+                    <div style="font-size:4rem; margin-bottom:var(--spacing);">✅</div>
+                    <h3 style="color:var(--color-success); margin-bottom:var(--spacing-sm);">¡Organización revertida!</h3>
+                    <p id="undoResultMsg" style="color:var(--color-text-light); margin-bottom:var(--spacing-lg);"></p>
+                    <a href="/" class="btn btn-primary">Volver al inicio</a>
                 </div>
             </div>
             {% else %}
@@ -394,6 +435,76 @@
                 section.style.display = 'block';
             } else {
                 section.style.display = 'none';
+            }
+        }
+
+        // Función Deshacer
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarEstadoUndo();
+        });
+
+        async function verificarEstadoUndo() {
+            try {
+                const resp = await fetch('/deshacer/estado');
+                const data = await resp.json();
+                const btnUndo = document.getElementById('btnUndo');
+                const undoText = document.getElementById('undoText');
+
+                if (data.disponible) {
+                    btnUndo.disabled = false;
+                    undoText.textContent = `Esto devolverá ${data.total_archivos} archivos a su ubicación original (${data.fecha})`;
+                } else {
+                    btnUndo.disabled = true;
+                    undoText.textContent = 'No hay operación disponible para deshacer';
+                }
+            } catch (e) {
+                console.error('Error verificando undo:', e);
+            }
+        }
+
+        let undoTotalArchivos = 0;
+
+        function mostrarModalUndo() {
+            document.getElementById('undoModal').style.display = 'flex';
+        }
+
+        function cerrarModalUndo() {
+            document.getElementById('undoModal').style.display = 'none';
+        }
+
+        async function ejecutarUndo() {
+            cerrarModalUndo();
+            document.getElementById('undoInfo').style.display = 'none';
+            document.getElementById('undoProgress').style.display = 'block';
+
+            const fill = document.getElementById('undoProgressFill');
+            const msg = document.getElementById('undoProgressMsg');
+
+            try {
+                fill.style.width = '50%';
+                msg.textContent = 'Moviendo archivos de vuelta...';
+
+                const resp = await fetch('/deshacer', { method: 'POST' });
+                const data = await resp.json();
+
+                fill.style.width = '100%';
+                msg.textContent = 'Completado';
+
+                setTimeout(() => {
+                    document.getElementById('undoProgress').style.display = 'none';
+                    document.getElementById('undoResult').style.display = 'block';
+
+                    if (data.success) {
+                        document.getElementById('undoResultMsg').textContent =
+                            `✅ ${data.revertidos} archivos devueltos${data.fallidos > 0 ? ` (${data.fallidos} fallos)` : ''}${data.carpetas_eliminadas > 0 ? `. ${data.carpetas_eliminadas} carpetas eliminadas.` : ''}`;
+                    } else {
+                        document.getElementById('undoResult').querySelector('h3').textContent = '❌ Error';
+                        document.getElementById('undoResultMsg').textContent = data.error || 'Error al deshacer';
+                    }
+                }, 500);
+
+            } catch (e) {
+                msg.textContent = 'Error: ' + e.message;
             }
         }
     </script>
